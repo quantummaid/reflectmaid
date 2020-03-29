@@ -10,9 +10,18 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
 
     <properties>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
