@@ -10,7 +10,7 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.1.1</version>
+    <version>0.1.2</version>
 
     <properties>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>

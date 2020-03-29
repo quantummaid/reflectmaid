@@ -53,6 +53,10 @@ public final class UnresolvedType {
         return new UnresolvedType(type, typeVariableNamesOf(type), resolvers);
     }
 
+    public List<TypeVariableName> typeVariables() {
+        return variables;
+    }
+
     public ResolvedType resolve(final ResolvedType... values) {
         return resolve(asList(values));
     }
