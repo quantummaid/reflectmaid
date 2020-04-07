@@ -1,11 +1,16 @@
+[![Last Commit](https://img.shields.io/github/last-commit/quantummaid/reflectmaid)](https://github.com/quantummaid/reflectmaid)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.quantummaid.reflectmaid/reflectmaid-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.quantummaid.reflectmaid/reflectmaid-parent)
+[![Code Size](https://img.shields.io/github/languages/code-size/quantummaid/reflectmaid)](https://github.com/quantummaid/reflectmaid)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Slack](https://img.shields.io/badge/chat%20on-Slack-brightgreen)](https://join.slack.com/t/quantummaid/shared_invite/zt-cx5qd605-vG10I~WazfgH9WOnXMzl3Q)
+[![Gitter](https://img.shields.io/badge/chat%20on-Gitter-brightgreen)](https://gitter.im/quantum-maid-framework/community)
+[![Twitter](https://img.shields.io/twitter/follow/quantummaid)](https://twitter.com/quantummaid)
 
 <img src="quantummaid_logo.png" align="left"/>
 
 # ReflectMaid
 
-An utility project for other QuantumMaid projects that handles reflections. 
+A utility project for other QuantumMaid projects that handles reflections. 
  
 ## GenericType
 A lot of configuration methods throughout the QuantumMaid framework and its sub-probjects (HttpMaid, MapMaid, etc.)
