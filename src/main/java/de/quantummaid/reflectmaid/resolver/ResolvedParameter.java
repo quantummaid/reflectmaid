@@ -52,8 +52,8 @@ public final class ResolvedParameter {
                 .collect(toList());
     }
 
-    public static ResolvedParameter resolveParameter(final ClassType declaringType,
-                                                     final Parameter parameter) {
+    private static ResolvedParameter resolveParameter(final ClassType declaringType,
+                                                      final Parameter parameter) {
         NotNullValidator.validateNotNull(declaringType, "declaringType");
         NotNullValidator.validateNotNull(parameter, "parameter");
 

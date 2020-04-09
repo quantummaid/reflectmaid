@@ -21,4 +21,8 @@ support generic types (see [Type Erasure](https://docs.oracle.com/javase/tutoria
 
 To work around the aforementioned limitation, QuantumMaid offers the `GenericClass` type.
 Whenever a configuration method takes a parameter of type `java.lang.Class`, there will be an overloaded variant
-of that configuration method that accepts a `GenericType` parameter instead of the `java.lang.Class` parameter.   
+of that configuration method that accepts a `GenericType` parameter instead of the `java.lang.Class` parameter.
+
+## Synthetic methods, constructors and fields
+[Synthetic methods, constructors and fields](https://www.baeldung.com/java-synthetic) are ignored by ReflectMaid.
+This is recommended [to support tools like JaCoCo](https://www.jacoco.org/jacoco/trunk/doc/faq.html).

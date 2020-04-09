@@ -50,6 +50,7 @@ public final class ResolvedField {
     public static List<ResolvedField> resolvedFields(final ClassType fullType) {
         final Class<?> type = fullType.assignableType();
         return stream(type.getDeclaredFields())
+                .filter(field -> !field.isSynthetic())
                 .map(field -> {
                     final ResolvedType resolved = resolveType(field.getGenericType(), fullType);
                     return resolvedField(field.getName(), resolved, field);
