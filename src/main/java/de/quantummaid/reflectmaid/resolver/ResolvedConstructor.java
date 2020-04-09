@@ -45,6 +45,7 @@ public final class ResolvedConstructor {
 
     public static List<ResolvedConstructor> resolveConstructors(final ClassType fullType) {
         return stream(fullType.assignableType().getDeclaredConstructors())
+                .filter(constructor -> !constructor.isSynthetic())
                 .map(constructor -> resolveConstructor(constructor, fullType))
                 .collect(toList());
     }

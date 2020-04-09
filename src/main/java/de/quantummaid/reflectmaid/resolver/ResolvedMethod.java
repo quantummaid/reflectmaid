@@ -57,6 +57,7 @@ public final class ResolvedMethod {
         final Class<?> type = fullType.assignableType();
         final Method[] declaredMethods = type.getDeclaredMethods();
         return stream(declaredMethods)
+                .filter(method -> !method.isSynthetic())
                 .map(method -> {
                     try {
                         return of(resolveMethod(method, fullType));
