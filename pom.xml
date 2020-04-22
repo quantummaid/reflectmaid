@@ -5,12 +5,12 @@
     <parent>
         <groupId>de.quantummaid</groupId>
         <artifactId>quantummaid-opensource-parent</artifactId>
-        <version>0.9.33</version>
+        <version>0.9.35</version>
     </parent>
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.1.13</version>
+    <version>0.1.14</version>
 
     <name>ReflectMaid</name>
 
