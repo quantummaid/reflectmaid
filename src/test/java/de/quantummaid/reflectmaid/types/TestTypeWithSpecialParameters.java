@@ -19,16 +19,13 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.validators;
+package de.quantummaid.reflectmaid.types;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
+import java.util.List;
 
-    private CustomTypeValidationException(final String s) {
-        super(s);
-    }
+public final class TestTypeWithSpecialParameters<T> {
 
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
+    public List<?> method(final T[] array1, final String[] array2) {
+        throw new UnsupportedOperationException();
     }
 }

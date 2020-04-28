@@ -24,7 +24,6 @@ package de.quantummaid.reflectmaid;
 import de.quantummaid.reflectmaid.resolver.ResolvedConstructor;
 import de.quantummaid.reflectmaid.resolver.ResolvedField;
 import de.quantummaid.reflectmaid.resolver.ResolvedMethod;
-import de.quantummaid.reflectmaid.unresolved.UnresolvedType;
 import de.quantummaid.reflectmaid.validators.NotNullValidator;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
@@ -55,11 +54,6 @@ public final class ClassType implements ResolvedType {
     private List<ResolvedConstructor> constructors;
     @Exclude
     private List<ResolvedField> fields;
-
-    public static ResolvedType typeOfObject(final Object object) {
-        NotNullValidator.validateNotNull(object, "object");
-        return UnresolvedType.unresolvedType(object.getClass()).resolveFromObject(object);
-    }
 
     public static ClassType fromClassWithoutGenerics(final Class<?> type) {
         NotNullValidator.validateNotNull(type, "type");

@@ -19,10 +19,11 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.unresolved.breaking;
+package de.quantummaid.reflectmaid.types;
 
-import de.quantummaid.reflectmaid.ResolvedType;
+public final class TypeWithUnresolvableTypeVariable {
 
-public interface TypeVariableResolver {
-    ResolvedType resolve(Object object);
+    public <T> T method() {
+        throw new UnsupportedOperationException();
+    }
 }

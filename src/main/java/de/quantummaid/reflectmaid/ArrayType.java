@@ -58,6 +58,11 @@ public final class ArrayType implements ResolvedType {
     }
 
     @Override
+    public String simpleDescription() {
+        return this.componentType.simpleDescription() + "[]";
+    }
+
+    @Override
     public String description() {
         return this.componentType.description() + "[]";
     }

@@ -25,10 +25,12 @@ import java.util.List;
 
 import static de.quantummaid.reflectmaid.ArrayType.fromArrayClass;
 import static de.quantummaid.reflectmaid.ClassType.fromClassWithoutGenerics;
+import static de.quantummaid.reflectmaid.validators.NotNullValidator.validateNotNull;
 
 public interface ResolvedType {
 
     static ResolvedType resolvedType(final Class<?> type) {
+        validateNotNull(type, "type");
         if (type.isArray()) {
             return fromArrayClass(type);
         } else {
@@ -77,10 +79,10 @@ public interface ResolvedType {
     }
 
     default boolean isInstantiatable() {
-        if (isAbstract()) {
+        if (isInterface()) {
             return false;
         }
-        if (isInterface()) {
+        if (isAbstract()) {
             return false;
         }
         if (isWildcard()) {

@@ -19,15 +19,15 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.validators;
+package de.quantummaid.reflectmaid.types;
 
-public final class RequiredStringValidator {
-    private RequiredStringValidator() {
+public final class TestType {
+    private String field;
+
+    public TestType() {
     }
 
-    public static void validateNotNullNorEmpty(final String value, final String name) {
-        if (value == null || value.trim().isEmpty()) {
-            throw CustomTypeValidationException.customTypeValidationException(name + " must not be empty");
-        }
+    public String method() {
+        return "foo";
     }
 }
