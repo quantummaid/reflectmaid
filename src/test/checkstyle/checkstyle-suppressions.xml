@@ -26,4 +26,5 @@
 <suppressions>
     <suppress checks="ExecutableStatementCount|MethodLength|MagicNumber|IllegalCatch" files="ReflectMaidSpecs"/>
     <suppress checks="VisibilityModifier" files="TypeWithFields"/>
+    <suppress checks="TrailingComment" files="GenericType"/>
 </suppressions>
