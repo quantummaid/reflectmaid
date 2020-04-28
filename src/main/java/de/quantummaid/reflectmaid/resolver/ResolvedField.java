@@ -116,8 +116,8 @@ public final class ResolvedField {
             joiner.add("final");
         }
 
-        final String type = this.type.simpleDescription();
-        joiner.add(type);
+        final String typeDescription = this.type.simpleDescription();
+        joiner.add(typeDescription);
 
         joiner.add(this.name);
         return joiner.toString();

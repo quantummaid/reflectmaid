@@ -19,16 +19,8 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.validators;
+package de.quantummaid.reflectmaid;
 
-public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
-
-    private CustomTypeValidationException(final String s) {
-        super(s);
-    }
-
-    public static CustomTypeValidationException customTypeValidationException(final String message) {
-        return new CustomTypeValidationException(message);
-    }
+public interface ExceptionThrowingLambda {
+    void run() throws Exception;
 }

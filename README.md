@@ -1,3 +1,12 @@
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=security_rating)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=alert_status)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=sqale_index)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=bugs)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=code_smells)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=sqale_index)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=de.quantummaid.reflectmaid%3Areflectmaid-parent&metric=coverage)](https://sonarcloud.io/dashboard?id=de.quantummaid.reflectmaid%3Areflectmaid-parent)
 [![Last Commit](https://img.shields.io/github/last-commit/quantummaid/reflectmaid)](https://github.com/quantummaid/reflectmaid)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.quantummaid.reflectmaid/reflectmaid-parent/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.quantummaid.reflectmaid/reflectmaid-parent)
 [![Code Size](https://img.shields.io/github/languages/code-size/quantummaid/reflectmaid)](https://github.com/quantummaid/reflectmaid)
@@ -10,7 +19,7 @@
 
 # ReflectMaid
 
-A utility project for other QuantumMaid projects that handles reflections. 
+A utility project for other [QuantumMaid](https://quantummaid.de/) projects that handles reflections. 
  
 ## GenericType
 A lot of configuration methods throughout the QuantumMaid framework and its sub-probjects (HttpMaid, MapMaid, etc.)

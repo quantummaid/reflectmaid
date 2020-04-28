@@ -40,7 +40,7 @@ import static java.util.stream.Collectors.toList;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GenericType<T> {
+public final class GenericType<T> { // NOSONAR
     private final ResolvedType type;
 
     public static <T> GenericType<T> genericType(final Class<T> type) {

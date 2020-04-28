@@ -24,5 +24,6 @@
         "-//Puppy Crawl//DTD Suppressions 1.1//EN"
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
-
+    <suppress checks="ExecutableStatementCount|MethodLength|MagicNumber|IllegalCatch" files="ReflectMaidSpecs"/>
+    <suppress checks="VisibilityModifier" files="TypeWithFields"/>
 </suppressions>

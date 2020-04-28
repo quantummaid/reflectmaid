@@ -23,7 +23,6 @@ package de.quantummaid.reflectmaid.unresolved;
 
 import de.quantummaid.reflectmaid.ResolvedType;
 import de.quantummaid.reflectmaid.TypeVariableName;
-import de.quantummaid.reflectmaid.unresolved.breaking.TypeVariableResolvers;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,6 @@ import java.util.Map;
 
 import static de.quantummaid.reflectmaid.ClassType.fromClassWithGenerics;
 import static de.quantummaid.reflectmaid.TypeVariableName.typeVariableNamesOf;
-import static de.quantummaid.reflectmaid.unresolved.breaking.TypeVariableResolvers.resolversFor;
 import static de.quantummaid.reflectmaid.validators.NotNullValidator.validateNotNull;
 import static java.util.Arrays.asList;
 
@@ -45,12 +43,10 @@ import static java.util.Arrays.asList;
 public final class UnresolvedType {
     private final Class<?> type;
     private final List<TypeVariableName> variables;
-    private final TypeVariableResolvers resolvers;
 
     public static UnresolvedType unresolvedType(final Class<?> type) {
         validateNotNull(type, "type");
-        final TypeVariableResolvers resolvers = resolversFor(type);
-        return new UnresolvedType(type, typeVariableNamesOf(type), resolvers);
+        return new UnresolvedType(type, typeVariableNamesOf(type));
     }
 
     public List<TypeVariableName> typeVariables() {
@@ -71,15 +67,10 @@ public final class UnresolvedType {
             final ResolvedType value = values.get(i);
             resolvedParameters.put(name, value);
         }
-        if(resolvedParameters.isEmpty()) {
+        if (resolvedParameters.isEmpty()) {
             return ResolvedType.resolvedType(this.type);
         } else {
             return fromClassWithGenerics(this.type, resolvedParameters);
         }
-    }
-
-    public ResolvedType resolveFromObject(final Object object) {
-        final List<ResolvedType> typeList = this.resolvers.resolve(object);
-        return resolve(typeList.toArray(ResolvedType[]::new));
     }
 }

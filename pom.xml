@@ -10,11 +10,14 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.1.16</version>
+    <version>0.1.17</version>
 
     <name>ReflectMaid</name>
 
     <properties>
+        <checkstyle.suppressions.location>
+            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
+        </checkstyle.suppressions.location>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
     </properties>
 
@@ -24,6 +27,12 @@
             <artifactId>lombok</artifactId>
             <version>1.18.12</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

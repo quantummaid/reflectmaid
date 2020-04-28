@@ -117,7 +117,7 @@ public final class ResolvedMethod {
     }
 
     public String describe() {
-        final String returnType = ofNullable(this.returnType)
+        final String returnTypeDescription = ofNullable(this.returnType)
                 .map(type -> type.assignableType().getSimpleName())
                 .orElse("void");
         final String name = this.method.getName();
@@ -131,7 +131,7 @@ public final class ResolvedMethod {
                 .collect(joining(", "));
         return format(
                 "'%s %s(%s)' [%s]",
-                returnType,
+                returnTypeDescription,
                 name,
                 parametersString,
                 fullSignature);
