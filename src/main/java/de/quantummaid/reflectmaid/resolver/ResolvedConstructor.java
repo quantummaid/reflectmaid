@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.toList;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings("java:S1452")
 public final class ResolvedConstructor {
     private final List<ResolvedParameter> parameters;
     private final Constructor<?> constructor;
