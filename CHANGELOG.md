@@ -4,11 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.20](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.1.20/jar) - 2020-05_13
+## [0.1.21](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.1.21/jar) - 2020-05-31
+### Added
+- Feature [#22](https://github.com/quantummaid/reflectmaid/issues/22).
+
+## [0.1.20](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.1.20/jar) - 2020-05-13
 ### Changed
 - Update dependencies.
 
-## [0.1.19](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.1.19/jar) - 2020-05_02
+## [0.1.19](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.1.19/jar) - 2020-05-02
 ### Changed
 - Update dependencies.
 
