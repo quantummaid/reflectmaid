@@ -61,12 +61,14 @@ public final class ClassType implements ResolvedType {
             throw new UnsupportedOperationException();
         }
         if (type.getTypeParameters().length != 0) {
-            throw new UnsupportedOperationException(format("Type variables of '%s' cannot be resolved", type.getName()));
+            throw new UnsupportedOperationException(
+                    format("Type variables of '%s' cannot be resolved", type.getName()));
         }
         return fromClassWithGenerics(type, emptyMap());
     }
 
-    public static ClassType fromClassWithGenerics(final Class<?> type, final Map<TypeVariableName, ResolvedType> typeParameters) {
+    public static ClassType fromClassWithGenerics(final Class<?> type,
+                                                  final Map<TypeVariableName, ResolvedType> typeParameters) {
         NotNullValidator.validateNotNull(type, "type");
         NotNullValidator.validateNotNull(typeParameters, "typeParameters");
         if (type.isArray()) {

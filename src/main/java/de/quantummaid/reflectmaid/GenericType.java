@@ -40,7 +40,8 @@ import static java.util.stream.Collectors.toList;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-public final class GenericType<T> { // NOSONAR
+@SuppressWarnings("java:S2326")
+public final class GenericType<T> {
     private final ResolvedType type;
 
     public static <T> GenericType<T> genericType(final Class<T> type) {
@@ -51,7 +52,8 @@ public final class GenericType<T> { // NOSONAR
                     .map(TypeVariableName::name)
                     .collect(joining(", ", "[", "]"));
             throw genericTypeException(format(
-                    "type '%s' contains the following type variables that need to be filled in in order to create a %s object: %s",
+                    "type '%s' contains the following type variables that need " +
+                            "to be filled in in order to create a %s object: %s",
                     type.getName(),
                     GenericType.class.getSimpleName(),
                     variables

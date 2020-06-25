@@ -30,7 +30,8 @@ public final class UnresolvableTypeVariableException extends RuntimeException {
         super(message);
     }
 
-    public static UnresolvableTypeVariableException unresolvableTypeVariableException(final TypeVariableName variableName) {
+    public static UnresolvableTypeVariableException unresolvableTypeVariableException(
+            final TypeVariableName variableName) {
         validateNotNull(variableName, "variableName");
         final String message = format("No type variable with name '%s'", variableName.name());
         return new UnresolvableTypeVariableException(message);

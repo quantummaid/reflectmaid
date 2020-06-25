@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static de.quantummaid.reflectmaid.UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException;
 import static java.lang.String.format;
 
 public final class TypeResolver {
@@ -51,7 +52,8 @@ public final class TypeResolver {
         if (type instanceof WildcardType) {
             return WildcardedType.wildcardType();
         }
-        throw UnsupportedJvmFeatureInTypeException.unsupportedJvmFeatureInTypeException(format("Unknown 'Type' implementation by class '%s' on object '%s'", type.getClass(), type));
+        throw unsupportedJvmFeatureInTypeException(format(
+                "Unknown 'Type' implementation by class '%s' on object '%s'", type.getClass(), type));
     }
 
     private static ResolvedType resolveClass(final Class<?> clazz, final ClassType fullType) {
@@ -64,12 +66,14 @@ public final class TypeResolver {
         }
     }
 
-    private static ResolvedType resolveTypeVariable(final TypeVariable<?> typeVariable, final ClassType fullType) {
+    private static ResolvedType resolveTypeVariable(final TypeVariable<?> typeVariable,
+                                                    final ClassType fullType) {
         final TypeVariableName typeVariableName = TypeVariableName.typeVariableName(typeVariable);
         return fullType.resolveTypeVariable(typeVariableName);
     }
 
-    private static ResolvedType resolveParameterizedType(final ParameterizedType parameterizedType, final ClassType context) {
+    private static ResolvedType resolveParameterizedType(final ParameterizedType parameterizedType,
+                                                         final ClassType context) {
         final Class<?> rawType = (Class<?>) parameterizedType.getRawType();
         final List<TypeVariableName> typeVariableNames = TypeVariableName.typeVariableNamesOf(rawType);
 
@@ -85,7 +89,8 @@ public final class TypeResolver {
         return ClassType.fromClassWithGenerics(rawType, typeParameters);
     }
 
-    private static ArrayType resolveGenericArrayType(final GenericArrayType genericArrayType, final ClassType context) {
+    private static ArrayType resolveGenericArrayType(final GenericArrayType genericArrayType,
+                                                     final ClassType context) {
         final Type componentType = genericArrayType.getGenericComponentType();
         final ResolvedType fullComponentType = resolveType(componentType, context);
         return ArrayType.arrayType(fullComponentType);

@@ -27,6 +27,7 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 
@@ -49,7 +50,7 @@ public final class TypeVariableName {
         return typeVariableName(typeVariable.getName());
     }
 
-    public static List<TypeVariableName> typeVariableNamesOf(final Class<?> type) {
+    public static List<TypeVariableName> typeVariableNamesOf(final GenericDeclaration type) {
         return stream(type.getTypeParameters())
                 .map(TypeVariableName::typeVariableName)
                 .collect(toList());
