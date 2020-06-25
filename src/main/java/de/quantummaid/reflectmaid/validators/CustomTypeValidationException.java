@@ -22,7 +22,6 @@
 package de.quantummaid.reflectmaid.validators;
 
 public final class CustomTypeValidationException extends IllegalArgumentException {
-    private static final long serialVersionUID = -5137712128096384694L;
 
     private CustomTypeValidationException(final String s) {
         super(s);

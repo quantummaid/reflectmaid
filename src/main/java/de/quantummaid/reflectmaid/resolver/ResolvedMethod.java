@@ -47,6 +47,7 @@ import static java.util.stream.Collectors.toList;
 @ToString
 @EqualsAndHashCode
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@SuppressWarnings({"java:S1142", "java:S1166"})
 public final class ResolvedMethod {
     private final ResolvedType returnType;
     private final List<ResolvedParameter> parameters;
@@ -117,11 +118,6 @@ public final class ResolvedMethod {
     }
 
     public String describe() {
-        final String returnTypeDescription = ofNullable(this.returnType)
-                .map(type -> type.assignableType().getSimpleName())
-                .orElse("void");
-        final String name = this.method.getName();
-        final String fullSignature = this.method.toGenericString();
         final String parametersString = this.parameters.stream()
                 .map(resolvedParameter -> {
                     final String type = resolvedParameter.type().simpleDescription();
@@ -129,6 +125,11 @@ public final class ResolvedMethod {
                     return format("%s %s", type, parameterName);
                 })
                 .collect(joining(", "));
+        final String returnTypeDescription = ofNullable(this.returnType)
+                .map(type -> type.assignableType().getSimpleName())
+                .orElse("void");
+        final String name = this.method.getName();
+        final String fullSignature = this.method.toGenericString();
         return format(
                 "'%s %s(%s)' [%s]",
                 returnTypeDescription,
