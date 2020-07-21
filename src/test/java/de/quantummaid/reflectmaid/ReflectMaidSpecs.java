@@ -209,13 +209,15 @@ public final class ReflectMaidSpecs {
 
         assertThat(resolvedMethod.returnType().isPresent(), is(true));
         final ResolvedType returnType = resolvedMethod.returnType().get();
-        assertThat(returnType.simpleDescription(), is("List<?>"));
+        assertThat(returnType.simpleDescription(), is("List<Object>"));
 
-        assertThat(resolvedMethod.parameters(), hasSize(2));
+        assertThat(resolvedMethod.parameters(), hasSize(3));
         final ResolvedParameter parameter1 = resolvedMethod.parameters().get(0);
         assertThat(parameter1.type().simpleDescription(), is("String[]"));
         final ResolvedParameter parameter2 = resolvedMethod.parameters().get(1);
         assertThat(parameter2.type().simpleDescription(), is("String[]"));
+        final ResolvedParameter parameter3 = resolvedMethod.parameters().get(2);
+        assertThat(parameter3.type().simpleDescription(), is("List<?>"));
     }
 
     @Test
@@ -322,6 +324,24 @@ public final class ReflectMaidSpecs {
 
         final GenericType<TestTypeWithTypeVariables> genericType = genericType(TestTypeWithTypeVariables.class, String.class);
         assertThat(genericType.toResolvedType().simpleDescription(), is("TestTypeWithTypeVariables<String>"));
+    }
+
+    @Test
+    public void wildcardsWithSingleUpperBoundAreNormalized() {
+        final GenericType<TypeWithFieldWithWildcardGenericWithSingleUpperBound> genericType =
+                genericType(TypeWithFieldWithWildcardGenericWithSingleUpperBound.class);
+        final ResolvedType resolvedType = genericType.toResolvedType();
+
+        assertThat(resolvedType, instanceOf(ClassType.class));
+        final ClassType classType = (ClassType) resolvedType;
+        final ResolvedType fieldType = classType.fields().get(0).type();
+        assertThat(fieldType.assignableType(), is(List.class));
+
+        final List<ResolvedType> typeParameters = fieldType.typeParameters();
+        assertThat(typeParameters.size(), is(1));
+        final ResolvedType typeParameter = typeParameters.get(0);
+        assertThat(typeParameter.isWildcard(), is(false));
+        assertThat(typeParameter.assignableType(), is(Serializable.class));
     }
 
     private static Exception withException(final ExceptionThrowingLambda runnable) {

@@ -50,6 +50,11 @@ public final class TypeResolver {
             return resolveGenericArrayType((GenericArrayType) type, context);
         }
         if (type instanceof WildcardType) {
+            final WildcardType wildcardType = (WildcardType) type;
+            if (wildcardType.getLowerBounds().length == 0 && wildcardType.getUpperBounds().length == 1) {
+                final Type upperBound = wildcardType.getUpperBounds()[0];
+                return resolveType(upperBound, context);
+            }
             return WildcardedType.wildcardType();
         }
         throw unsupportedJvmFeatureInTypeException(format(
