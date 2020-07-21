@@ -21,13 +21,9 @@
 
 package de.quantummaid.reflectmaid.types;
 
+import java.io.Serializable;
 import java.util.List;
 
-public final class TestTypeWithSpecialParameters<T> {
-
-    public List<?> method(final T[] array1,
-                          final String[] array2,
-                          final List<? super String> list1) {
-        throw new UnsupportedOperationException();
-    }
+public final class TypeWithFieldWithWildcardGenericWithSingleUpperBound {
+    private List<? extends Serializable> list;
 }
