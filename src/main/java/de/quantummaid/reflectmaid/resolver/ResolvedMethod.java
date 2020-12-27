@@ -63,10 +63,9 @@ public final class ResolvedMethod {
                     try {
                         return of(resolveMethod(method, fullType));
                     } catch (final UnresolvableTypeVariableException e) {
-                        return empty();
+                        return (Optional<ResolvedMethod>) (Object) empty();
                     }
                 })
-                .map(o -> (Optional<ResolvedMethod>) o)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toList());
