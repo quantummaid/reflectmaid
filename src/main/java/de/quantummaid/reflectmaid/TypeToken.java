@@ -27,6 +27,7 @@ import static de.quantummaid.reflectmaid.ClassType.fromClassWithoutGenerics;
 import static de.quantummaid.reflectmaid.TypeResolver.resolveType;
 import static de.quantummaid.reflectmaid.TypeVariableName.typeVariableName;
 
+@SuppressWarnings({"java:S2326", "java:S1610", "java:S1694"})
 public abstract class TypeToken<T> {
 
     public final ResolvedType toResolvedType() {
