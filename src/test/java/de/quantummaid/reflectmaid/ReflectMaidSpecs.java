@@ -344,6 +344,13 @@ public final class ReflectMaidSpecs {
         assertThat(typeParameter.assignableType(), is(Serializable.class));
     }
 
+    @Test
+    public void typeToken() {
+        final GenericType<List<String>> type = genericType(new TypeToken<>() {
+        });
+        assertThat(type.toResolvedType().simpleDescription(), is("List<String>"));
+    }
+
     private static Exception withException(final ExceptionThrowingLambda runnable) {
         Exception exception = null;
         try {
