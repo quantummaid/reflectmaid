@@ -112,8 +112,13 @@ public final class ResolvedMethod {
     }
 
     public boolean isPublic() {
-        final int modifiers = this.method.getModifiers();
+        final int modifiers = method.getModifiers();
         return Modifier.isPublic(modifiers);
+    }
+
+    public boolean isStatic() {
+        final int modifiers = method.getModifiers();
+        return Modifier.isStatic(modifiers);
     }
 
     public String describe() {
