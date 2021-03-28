@@ -57,6 +57,7 @@ class ThirdPartyAnnotation(private val fullyQualifiedNames: List<String>) {
     }
 
     companion object {
+        @JvmStatic
         fun thirdPartyAnnotation(vararg fullyQualifiedNames: String): ThirdPartyAnnotation {
             return ThirdPartyAnnotation(fullyQualifiedNames.toList())
         }
