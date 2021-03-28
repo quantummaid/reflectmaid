@@ -19,8 +19,18 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid;
+package de.quantummaid.reflectmaid.exceptions;
 
-@SuppressWarnings({"java:S2326", "java:S1610", "java:S1694"})
-public abstract class TypeToken<T> {
+import de.quantummaid.reflectmaid.validators.NotNullValidator;
+
+public final class UnsupportedJvmFeatureInTypeException extends UnsupportedOperationException {
+
+    private UnsupportedJvmFeatureInTypeException(final String message) {
+        super(message);
+    }
+
+    public static UnsupportedJvmFeatureInTypeException unsupportedJvmFeatureInTypeException(final String message) {
+        NotNullValidator.validateNotNull(message, "message");
+        return new UnsupportedJvmFeatureInTypeException(message);
+    }
 }

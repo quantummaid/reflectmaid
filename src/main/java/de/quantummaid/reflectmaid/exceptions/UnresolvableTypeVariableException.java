@@ -19,18 +19,23 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid;
+package de.quantummaid.reflectmaid.exceptions;
 
-import de.quantummaid.reflectmaid.validators.NotNullValidator;
+import de.quantummaid.reflectmaid.TypeVariableName;
 
-public final class UnsupportedJvmFeatureInTypeException extends UnsupportedOperationException {
+import static de.quantummaid.reflectmaid.validators.NotNullValidator.validateNotNull;
+import static java.lang.String.format;
 
-    private UnsupportedJvmFeatureInTypeException(final String message) {
+public final class UnresolvableTypeVariableException extends RuntimeException {
+
+    private UnresolvableTypeVariableException(final String message) {
         super(message);
     }
 
-    public static UnsupportedJvmFeatureInTypeException unsupportedJvmFeatureInTypeException(final String message) {
-        NotNullValidator.validateNotNull(message, "message");
-        return new UnsupportedJvmFeatureInTypeException(message);
+    public static UnresolvableTypeVariableException unresolvableTypeVariableException(
+            final TypeVariableName variableName) {
+        validateNotNull(variableName, "variableName");
+        final String message = format("No type variable with name '%s'", variableName.name());
+        return new UnresolvableTypeVariableException(message);
     }
 }

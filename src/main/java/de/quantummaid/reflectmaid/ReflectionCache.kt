@@ -1,9 +1,8 @@
-package de.quantummaid.reflectmaid.cache
+package de.quantummaid.reflectmaid
 
-import de.quantummaid.reflectmaid.GenericType
-import de.quantummaid.reflectmaid.ResolvedType
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 
-class ReflectMaidCache {
+class ReflectionCache {
     private val map: MutableMap<GenericType<*>, ResolvedType> = LinkedHashMap()
 
     fun lookUp(genericType: GenericType<*>, default: (GenericType<*>) -> ResolvedType): ResolvedType {

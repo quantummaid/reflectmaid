@@ -1,5 +1,8 @@
 package de.quantummaid.reflectmaid
 
+import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import java.lang.reflect.Type
 import kotlin.reflect.KClass
 
 sealed class GenericType<T> {
@@ -58,6 +61,11 @@ sealed class GenericType<T> {
         fun <T : Any> fromResolvedType(resolvedType: ResolvedType): GenericType<T> {
             return GenericTypeFromResolvedType(resolvedType)
         }
+
+        @JvmStatic
+        fun <T : Any> fromReflectionType(type: Type, genericContext: ClassType): GenericType<T> {
+            return GenericTypeFromReflectionType(type, genericContext)
+        }
     }
 }
 
@@ -80,3 +88,5 @@ class GenericTypeWildcard : GenericType<Any>() {
 }
 
 data class GenericTypeFromResolvedType<T>(val resolvedType: ResolvedType) : GenericType<T>()
+
+data class GenericTypeFromReflectionType<T>(val type: Type, val genericContext: ClassType) : GenericType<T>()
