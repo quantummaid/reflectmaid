@@ -3,6 +3,8 @@ package de.quantummaid.reflectmaid
 import de.quantummaid.reflectmaid.GenericType.Companion.fromResolvedType
 import de.quantummaid.reflectmaid.GenericType.Companion.genericType
 import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
+import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.types.TypeWithFields
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.hasSize
@@ -40,6 +42,20 @@ class CacheSpecs {
 
         assertThat(registeredTypes, hasSize(2))
         assertThat(registeredTypes, contains(stringResolvedType, anyResolvedType))
+    }
+
+    @Test
+    fun reflectMaidRegistersTypesRecursively() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+
+        val resolvedType = reflectMaid.resolve(TypeWithFields::class)
+
+        assertThat(reflectMaid.registeredTypes(), hasSize(1))
+
+        resolvedType as ClassType
+        resolvedType.fields()
+
+        assertThat(reflectMaid.registeredTypes(), hasSize(2))
     }
 
     @Test
@@ -90,7 +106,8 @@ class CacheSpecs {
 
     @Test
     fun sameResolvedTypeReferenceGetsReturnedForSameResolvedTypeBasedGenericType() {
-        val resolvedType = ClassType.fromClassWithoutGenerics(String::class.java)
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolvedType = ClassType.fromClassWithoutGenerics(reflectMaid, String::class.java)
         assertSameReferenceGetsReturned { fromResolvedType<String>(resolvedType) }
     }
 

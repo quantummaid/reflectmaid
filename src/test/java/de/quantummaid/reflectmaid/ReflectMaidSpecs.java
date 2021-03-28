@@ -21,12 +21,16 @@
 
 package de.quantummaid.reflectmaid;
 
-import de.quantummaid.reflectmaid.resolver.ResolvedConstructor;
-import de.quantummaid.reflectmaid.resolver.ResolvedField;
-import de.quantummaid.reflectmaid.resolver.ResolvedMethod;
-import de.quantummaid.reflectmaid.resolver.ResolvedParameter;
+import de.quantummaid.reflectmaid.exceptions.GenericTypeException;
+import de.quantummaid.reflectmaid.resolvedtype.ArrayType;
+import de.quantummaid.reflectmaid.resolvedtype.ClassType;
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType;
+import de.quantummaid.reflectmaid.resolvedtype.WildcardedType;
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor;
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField;
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod;
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter;
 import de.quantummaid.reflectmaid.types.*;
-import de.quantummaid.reflectmaid.unresolved.UnresolvedType;
 import de.quantummaid.reflectmaid.validators.NotNullValidator;
 import org.junit.jupiter.api.Test;
 
@@ -35,15 +39,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import static de.quantummaid.reflectmaid.ArrayType.fromArrayClass;
-import static de.quantummaid.reflectmaid.ClassType.fromClassWithGenerics;
-import static de.quantummaid.reflectmaid.ClassType.fromClassWithoutGenerics;
+import static de.quantummaid.reflectmaid.resolvedtype.ArrayType.fromArrayClass;
+import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithGenerics;
+import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithoutGenerics;
 import static de.quantummaid.reflectmaid.GenericType.genericType;
 import static de.quantummaid.reflectmaid.ReflectMaid.aReflectMaid;
-import static de.quantummaid.reflectmaid.ResolvedType.resolvedType;
-import static de.quantummaid.reflectmaid.TypeResolver.resolveType;
 import static de.quantummaid.reflectmaid.TypeVariableName.typeVariableName;
-import static de.quantummaid.reflectmaid.WildcardedType.wildcardType;
+import static de.quantummaid.reflectmaid.resolvedtype.WildcardedType.wildcardType;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -52,14 +54,9 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 public final class ReflectMaidSpecs {
 
     @Test
-    public void nullValue() {
-        final Exception exception = withException(() -> resolvedType(null));
-        assertThat(exception.getMessage(), is("type must not be null"));
-    }
-
-    @Test
     public void typeWithoutTypeVariables() {
-        final ResolvedType resolvedType = resolvedType(TestType.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(TestType.class);
         assertThat(resolvedType.assignableType(), is(TestType.class));
         assertThat(resolvedType.description(), is("de.quantummaid.reflectmaid.types.TestType"));
         assertThat(resolvedType.simpleDescription(), is("TestType"));
@@ -81,18 +78,18 @@ public final class ReflectMaidSpecs {
         assertThat(classType.constructors(), hasSize(1));
         final ResolvedConstructor constructor = classType.constructors().get(0);
         assertThat(constructor.isPublic(), is(true));
-        assertThat(constructor.parameters(), hasSize(0));
+        assertThat(constructor.getParameters(), hasSize(0));
         assertThat(constructor.describe(), is("public de.quantummaid.reflectmaid.types.TestType()"));
-        assertThat(constructor.constructor().getName(), is("de.quantummaid.reflectmaid.types.TestType"));
+        assertThat(constructor.getConstructor().getName(), is("de.quantummaid.reflectmaid.types.TestType"));
 
         assertThat(classType.methods(), hasSize(1));
         final ResolvedMethod method = classType.methods().get(0);
         assertThat(method.isPublic(), is(true));
         assertThat(method.describe(), is("'String method()' [public java.lang.String de.quantummaid.reflectmaid.types.TestType.method()]"));
-        assertThat(method.parameters(), hasSize(0));
+        assertThat(method.getParameters(), hasSize(0));
         assertThat(method.name(), is("method"));
         assertThat(method.returnType().isPresent(), is(true));
-        assertThat(method.method().getName(), is("method"));
+        assertThat(method.getMethod().getName(), is("method"));
 
         assertThat(classType.fields(), hasSize(1));
         final ResolvedField field = classType.fields().get(0);
@@ -100,15 +97,15 @@ public final class ReflectMaidSpecs {
         assertThat(field.isStatic(), is(false));
         assertThat(field.isTransient(), is(false));
         assertThat(field.describe(), is("private String field"));
-        assertThat(field.name(), is("field"));
-        assertThat(field.type().simpleDescription(), is("String"));
-        assertThat(field.field().getName(), is("field"));
+        assertThat(field.getName(), is("field"));
+        assertThat(field.getType().simpleDescription(), is("String"));
+        assertThat(field.getField().getName(), is("field"));
     }
 
     @Test
     public void typeWithTypeVariables() {
-        final ResolvedType resolvedType = fromClassWithGenerics(TestTypeWithTypeVariables.class,
-                Map.of(typeVariableName("A"), resolvedType(String.class)));
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(genericType(TestTypeWithTypeVariables.class, String.class));
 
         assertThat(resolvedType.assignableType(), is(TestTypeWithTypeVariables.class));
         assertThat(resolvedType.description(), is("de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables<java.lang.String>"));
@@ -133,8 +130,9 @@ public final class ReflectMaidSpecs {
         final Exception exception1 = withException(() -> classType.typeParameter(typeVariableName("foo")));
         assertThat(exception1.getMessage(), is("No type parameter with the name: foo"));
 
-        final Exception exception2 = withException(() -> fromClassWithoutGenerics(TestTypeWithTypeVariables.class));
-        assertThat(exception2.getMessage(), is("Type variables of 'de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables' cannot be resolved"));
+        final Exception exception2 = withException(() -> reflectMaid.resolve(TestTypeWithTypeVariables.class));
+        assertThat(exception2.getMessage(), is("type 'de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables' contains the following type variables " +
+                "that need to be filled in in order to create a GenericType object: [A]"));
 
         assertThat(classType.methods(), hasSize(3));
         final ResolvedMethod parameterizedMethod = classType.methods().stream()
@@ -145,27 +143,23 @@ public final class ReflectMaidSpecs {
                 "[public void de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables.foo(de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables<A>)]"));
         assertThat(parameterizedMethod.hasParameters(List.of(resolvedType)), is(true));
         assertThat(parameterizedMethod.hasParameters(List.of()), is(false));
-        assertThat(parameterizedMethod.hasParameters(List.of(resolvedType(String.class))), is(false));
+        assertThat(parameterizedMethod.hasParameters(List.of(reflectMaid.resolve(String.class))), is(false));
 
-        assertThat(parameterizedMethod.parameters(), hasSize(1));
-        final ResolvedParameter parameter = parameterizedMethod.parameters().get(0);
+        assertThat(parameterizedMethod.getParameters(), hasSize(1));
+        final ResolvedParameter parameter = parameterizedMethod.getParameters().get(0);
         assertThat(parameter.name(), is("other"));
-        assertThat(parameter.type().simpleDescription(), is("TestTypeWithTypeVariables<String>"));
-        assertThat(parameter.parameter().getName(), is("other"));
+        assertThat(parameter.getType().simpleDescription(), is("TestTypeWithTypeVariables<String>"));
+        assertThat(parameter.getParameter().getName(), is("other"));
     }
 
     @Test
     public void arrayType() {
-        final Exception exception1 = withException(() -> fromClassWithoutGenerics(String[].class));
-        assertThat(exception1, instanceOf(UnsupportedOperationException.class));
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
 
-        final Exception exception2 = withException(() -> fromClassWithGenerics(String[].class, Map.of()));
-        assertThat(exception2, instanceOf(UnsupportedOperationException.class));
+        final Exception exception = withException(() -> fromArrayClass(reflectMaid, String.class));
+        assertThat(exception, instanceOf(UnsupportedOperationException.class));
 
-        final Exception exception3 = withException(() -> fromArrayClass(String.class));
-        assertThat(exception3, instanceOf(UnsupportedOperationException.class));
-
-        final ResolvedType resolvedType = resolvedType(String[].class);
+        final ResolvedType resolvedType = reflectMaid.resolve(String[].class);
         assertThat(resolvedType.description(), is("java.lang.String[]"));
         assertThat(resolvedType.simpleDescription(), is("String[]"));
         assertThat(resolvedType.assignableType(), is(String[].class));
@@ -202,8 +196,9 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void parameters() {
-        final ClassType classType = fromClassWithGenerics(TestTypeWithSpecialParameters.class,
-                Map.of(typeVariableName("T"), fromClassWithoutGenerics(String.class)));
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ClassType classType = fromClassWithGenerics(reflectMaid, TestTypeWithSpecialParameters.class,
+                Map.of(typeVariableName("T"), fromClassWithoutGenerics(reflectMaid, String.class)));
         assertThat(classType.methods(), hasSize(1));
         final ResolvedMethod resolvedMethod = classType.methods().get(0);
 
@@ -211,28 +206,29 @@ public final class ReflectMaidSpecs {
         final ResolvedType returnType = resolvedMethod.returnType().get();
         assertThat(returnType.simpleDescription(), is("List<Object>"));
 
-        assertThat(resolvedMethod.parameters(), hasSize(3));
-        final ResolvedParameter parameter1 = resolvedMethod.parameters().get(0);
-        assertThat(parameter1.type().simpleDescription(), is("String[]"));
-        final ResolvedParameter parameter2 = resolvedMethod.parameters().get(1);
-        assertThat(parameter2.type().simpleDescription(), is("String[]"));
-        final ResolvedParameter parameter3 = resolvedMethod.parameters().get(2);
-        assertThat(parameter3.type().simpleDescription(), is("List<?>"));
+        assertThat(resolvedMethod.getParameters(), hasSize(3));
+        final ResolvedParameter parameter1 = resolvedMethod.getParameters().get(0);
+        assertThat(parameter1.getType().simpleDescription(), is("String[]"));
+        final ResolvedParameter parameter2 = resolvedMethod.getParameters().get(1);
+        assertThat(parameter2.getType().simpleDescription(), is("String[]"));
+        final ResolvedParameter parameter3 = resolvedMethod.getParameters().get(2);
+        assertThat(parameter3.getType().simpleDescription(), is("List<?>"));
     }
 
     @Test
     public void fields() {
-        final ClassType classType = fromClassWithoutGenerics(TypeWithFields.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ClassType classType = (ClassType) reflectMaid.resolve(TypeWithFields.class);
         assertThat(classType.fields(), hasSize(2));
         final ResolvedField staticField = classType.fields().stream()
-                .filter(resolvedField -> resolvedField.name().equals("FIELD_1"))
+                .filter(resolvedField -> resolvedField.getName().equals("FIELD_1"))
                 .findFirst()
                 .orElseThrow();
         assertThat(staticField.describe(), is("public static final String FIELD_1"));
         assertThat(staticField.isStatic(), is(true));
 
         final ResolvedField transientField = classType.fields().stream()
-                .filter(resolvedField -> resolvedField.name().equals("field2"))
+                .filter(resolvedField -> resolvedField.getName().equals("field2"))
                 .findFirst()
                 .orElseThrow();
         assertThat(transientField.describe(), is("protected transient String field2"));
@@ -242,7 +238,8 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void primitive() {
-        final ResolvedType resolvedType = resolvedType(int.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(int.class);
         assertThat(resolvedType.description(), is("int"));
         assertThat(resolvedType.simpleDescription(), is("int"));
         assertThat(resolvedType.isAbstract(), is(false));
@@ -250,14 +247,16 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void abstractClass() {
-        final ResolvedType resolvedType = resolvedType(InputStream.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(InputStream.class);
         assertThat(resolvedType.isAbstract(), is(true));
         assertThat(resolvedType.isInstantiatable(), is(false));
     }
 
     @Test
     public void interfaceAsResolvedType() {
-        final ResolvedType resolvedType = resolvedType(Serializable.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(Serializable.class);
         assertThat(resolvedType.isInterface(), is(true));
         assertThat(resolvedType.isAbstract(), is(true));
         assertThat(resolvedType.isInstantiatable(), is(false));
@@ -265,20 +264,23 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void innerClass() {
-        final ResolvedType resolvedType = resolvedType(InnerClass.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(InnerClass.class);
         assertThat(resolvedType.isInnerClass(), is(true));
         assertThat(resolvedType.description(), is("de.quantummaid.reflectmaid.ReflectMaidSpecs$InnerClass"));
     }
 
     @Test
     public void methodsWithUnresolvableTypeVariablesAreIgnored() {
-        final ClassType classType = fromClassWithoutGenerics(TypeWithUnresolvableTypeVariable.class);
+        final ReflectMaid reflectMaid = aReflectMaid();
+        final ClassType classType = (ClassType) reflectMaid.resolve(TypeWithUnresolvableTypeVariable.class);
         assertThat(classType.methods(), hasSize(0));
     }
 
     @Test
     public void syntheticFeaturesAreIgnored() {
-        final ClassType classType = fromClassWithoutGenerics(NotNullValidator.class);
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ClassType classType = (ClassType) reflectMaid.resolve(NotNullValidator.class);
         assertThat(classType.fields(), hasSize(0));
         assertThat(classType.constructors(), hasSize(1));
         assertThat(classType.methods(), hasSize(1));
@@ -286,23 +288,27 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void unsupportedJvmFeature() {
-        final Exception exception = withException(() -> resolveType(new UnsupportedJvmFeature(), fromClassWithoutGenerics(String.class)));
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final ClassType context = (ClassType) reflectMaid.resolve(String.class);
+        final GenericType<?> genericType = GenericType.fromReflectionType(new UnsupportedJvmFeature(), context);
+        final Exception exception = withException(() -> reflectMaid.resolve(genericType));
         assertThat(exception.getMessage(), is("Unknown 'Type' implementation by class 'class de.quantummaid.reflectmaid.types.UnsupportedJvmFeature' " +
                 "on object 'unsupported'"));
     }
 
     @Test
     public void unresolvedType() {
-        final Exception exception = withException(() -> UnresolvedType.unresolvedType(TestTypeWithTypeVariables.class).resolve());
-        assertThat(exception, instanceOf(IllegalArgumentException.class));
+        final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
+        final Exception exception = withException(() -> reflectMaid.resolve(TestTypeWithTypeVariables.class));
+        assertThat(exception, instanceOf(GenericTypeException.class));
 
-        final ResolvedType resolvedType = UnresolvedType.unresolvedType(TestType.class).resolve();
+        final ResolvedType resolvedType = reflectMaid.resolve(TestType.class);
         assertThat(resolvedType.simpleDescription(), is("TestType"));
     }
 
     @Test
     public void genericTypeWithoutTypeVariables() {
-        final GenericType<TestType> genericType = genericType(TestType.class);
+        final GenericType<TestType> genericType = GenericType.genericType(TestType.class);
         final ReflectMaid reflectMaid = aReflectMaid();
         assertThat(reflectMaid.resolve(genericType).simpleDescription(), is("TestType"));
     }
@@ -311,7 +317,7 @@ public final class ReflectMaidSpecs {
     @Test
     public void genericTypeWithTypeVariables() {
         Exception exception = null;
-        final GenericType<TestTypeWithTypeVariables> genericType1 = genericType(TestTypeWithTypeVariables.class);
+        final GenericType<TestTypeWithTypeVariables> genericType1 = GenericType.genericType(TestTypeWithTypeVariables.class);
         final ReflectMaid reflectMaid = aReflectMaid();
         try {
             reflectMaid.resolve(genericType1);
@@ -322,20 +328,20 @@ public final class ReflectMaidSpecs {
         assertThat(exception.getMessage(), is("type 'de.quantummaid.reflectmaid.types.TestTypeWithTypeVariables' " +
                 "contains the following type variables that need to be filled in in order to create a GenericType object: [A]"));
 
-        final GenericType<TestTypeWithTypeVariables> genericType = genericType(TestTypeWithTypeVariables.class, String.class);
+        final GenericType<TestTypeWithTypeVariables> genericType = GenericType.genericType(TestTypeWithTypeVariables.class, String.class);
         assertThat(reflectMaid.resolve(genericType).simpleDescription(), is("TestTypeWithTypeVariables<String>"));
     }
 
     @Test
     public void wildcardsWithSingleUpperBoundAreNormalized() {
         final GenericType<TypeWithFieldWithWildcardGenericWithSingleUpperBound> genericType =
-                genericType(TypeWithFieldWithWildcardGenericWithSingleUpperBound.class);
+                GenericType.genericType(TypeWithFieldWithWildcardGenericWithSingleUpperBound.class);
         final ReflectMaid reflectMaid = aReflectMaid();
         final ResolvedType resolvedType = reflectMaid.resolve(genericType);
 
         assertThat(resolvedType, instanceOf(ClassType.class));
         final ClassType classType = (ClassType) resolvedType;
-        final ResolvedType fieldType = classType.fields().get(0).type();
+        final ResolvedType fieldType = classType.fields().get(0).getType();
         assertThat(fieldType.assignableType(), is(List.class));
 
         final List<ResolvedType> typeParameters = fieldType.typeParameters();
@@ -347,7 +353,7 @@ public final class ReflectMaidSpecs {
 
     @Test
     public void typeToken() {
-        final GenericType<List<String>> type = genericType(new TypeToken<>() {
+        final GenericType<List<String>> type = GenericType.genericType(new TypeToken<>() {
         });
         final ReflectMaid reflectMaid = aReflectMaid();
         assertThat(reflectMaid.resolve(type).simpleDescription(), is("List<String>"));

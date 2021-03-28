@@ -18,16 +18,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package de.quantummaid.reflectmaid.resolvedtype
 
-package de.quantummaid.reflectmaid;
-
-public final class GenericTypeException extends RuntimeException {
-
-    private GenericTypeException(final String message) {
-        super(message);
+class WildcardedType : ResolvedType {
+    override fun typeParameters(): List<ResolvedType> {
+        return emptyList()
     }
 
-    public static GenericTypeException genericTypeException(final String message) {
-        return new GenericTypeException(message);
+    override val isAbstract: Boolean
+        get() = false
+    override val isInterface: Boolean
+        get() = false
+    override val isWildcard: Boolean
+        get() = true
+
+    override fun description(): String {
+        return "?"
+    }
+
+    override fun assignableType(): Class<*> {
+        return Any::class.java
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is WildcardedType
+    }
+
+    override fun hashCode(): Int {
+        return 1
+    }
+
+    companion object {
+        @JvmStatic
+        fun wildcardType(): WildcardedType {
+            return WildcardedType()
+        }
     }
 }
