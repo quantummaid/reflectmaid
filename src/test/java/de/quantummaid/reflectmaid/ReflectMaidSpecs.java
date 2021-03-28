@@ -38,8 +38,8 @@ import java.util.Map;
 import static de.quantummaid.reflectmaid.ArrayType.fromArrayClass;
 import static de.quantummaid.reflectmaid.ClassType.fromClassWithGenerics;
 import static de.quantummaid.reflectmaid.ClassType.fromClassWithoutGenerics;
-import static de.quantummaid.reflectmaid.GenericType.fromResolvedType;
 import static de.quantummaid.reflectmaid.GenericType.genericType;
+import static de.quantummaid.reflectmaid.ReflectMaid.aReflectMaid;
 import static de.quantummaid.reflectmaid.ResolvedType.resolvedType;
 import static de.quantummaid.reflectmaid.TypeResolver.resolveType;
 import static de.quantummaid.reflectmaid.TypeVariableName.typeVariableName;
@@ -303,18 +303,18 @@ public final class ReflectMaidSpecs {
     @Test
     public void genericTypeWithoutTypeVariables() {
         final GenericType<TestType> genericType = genericType(TestType.class);
-        assertThat(genericType.toResolvedType().simpleDescription(), is("TestType"));
-
-        final GenericType<?> fromResolvedType = fromResolvedType(resolvedType(TestType.class));
-        assertThat(fromResolvedType.toResolvedType().simpleDescription(), is("TestType"));
+        final ReflectMaid reflectMaid = aReflectMaid();
+        assertThat(reflectMaid.resolve(genericType).simpleDescription(), is("TestType"));
     }
 
     @SuppressWarnings("rawtypes")
     @Test
     public void genericTypeWithTypeVariables() {
         Exception exception = null;
+        final GenericType<TestTypeWithTypeVariables> genericType1 = genericType(TestTypeWithTypeVariables.class);
+        final ReflectMaid reflectMaid = aReflectMaid();
         try {
-            genericType(TestTypeWithTypeVariables.class);
+            reflectMaid.resolve(genericType1);
         } catch (final Exception e) {
             exception = e;
         }
@@ -323,14 +323,15 @@ public final class ReflectMaidSpecs {
                 "contains the following type variables that need to be filled in in order to create a GenericType object: [A]"));
 
         final GenericType<TestTypeWithTypeVariables> genericType = genericType(TestTypeWithTypeVariables.class, String.class);
-        assertThat(genericType.toResolvedType().simpleDescription(), is("TestTypeWithTypeVariables<String>"));
+        assertThat(reflectMaid.resolve(genericType).simpleDescription(), is("TestTypeWithTypeVariables<String>"));
     }
 
     @Test
     public void wildcardsWithSingleUpperBoundAreNormalized() {
         final GenericType<TypeWithFieldWithWildcardGenericWithSingleUpperBound> genericType =
                 genericType(TypeWithFieldWithWildcardGenericWithSingleUpperBound.class);
-        final ResolvedType resolvedType = genericType.toResolvedType();
+        final ReflectMaid reflectMaid = aReflectMaid();
+        final ResolvedType resolvedType = reflectMaid.resolve(genericType);
 
         assertThat(resolvedType, instanceOf(ClassType.class));
         final ClassType classType = (ClassType) resolvedType;
@@ -348,7 +349,8 @@ public final class ReflectMaidSpecs {
     public void typeToken() {
         final GenericType<List<String>> type = genericType(new TypeToken<>() {
         });
-        assertThat(type.toResolvedType().simpleDescription(), is("List<String>"));
+        final ReflectMaid reflectMaid = aReflectMaid();
+        assertThat(reflectMaid.resolve(type).simpleDescription(), is("List<String>"));
     }
 
     private static Exception withException(final ExceptionThrowingLambda runnable) {
