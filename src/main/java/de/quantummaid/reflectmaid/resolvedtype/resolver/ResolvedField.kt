@@ -24,14 +24,9 @@ import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
-import lombok.AccessLevel
-import lombok.EqualsAndHashCode
-import lombok.RequiredArgsConstructor
-import lombok.ToString
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.util.*
-import java.util.stream.Collectors
 
 data class ResolvedField(val name: String,
                          val type: ResolvedType,
@@ -83,23 +78,15 @@ data class ResolvedField(val name: String,
     }
 
     companion object {
-        @JvmStatic
         fun resolvedFields(reflectMaid: ReflectMaid,
                            fullType: ClassType): List<ResolvedField> {
             val type = fullType.assignableType()
-            return Arrays.stream(type.declaredFields)
-                    .filter { field: Field -> !field.isSynthetic }
-                    .map { field: Field ->
-                        val resolved = reflectMaid.resolve(fromReflectionType<Any>(field.genericType, fullType))
-                        resolvedField(field.name, resolved, field)
+            return type.declaredFields
+                    .filter { !it.isSynthetic }
+                    .map {
+                        val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))
+                        ResolvedField(it.name, resolved, it)
                     }
-                    .collect(Collectors.toList())
-        }
-
-        private fun resolvedField(name: String,
-                                  type: ResolvedType,
-                                  field: Field): ResolvedField {
-            return ResolvedField(name, type, field)
         }
     }
 }

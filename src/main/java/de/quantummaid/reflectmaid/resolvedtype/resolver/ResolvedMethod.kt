@@ -22,13 +22,12 @@ package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.ReflectMaid
-import de.quantummaid.reflectmaid.exceptions.UnresolvableTypeVariableException
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.*
-import java.util.stream.Collectors
 
 data class ResolvedMethod(val returnType: ResolvedType?,
                           val parameters: List<ResolvedParameter>,
@@ -67,28 +66,12 @@ data class ResolvedMethod(val returnType: ResolvedType?,
         }
 
     fun describe(): String {
-        val parametersString = parameters.stream()
-                .map { resolvedParameter: ResolvedParameter ->
-                    val type = resolvedParameter.type.simpleDescription()
-                    val parameterName = resolvedParameter.parameter.name
-                    String.format("%s %s", type, parameterName)
-                }
-                .collect(Collectors.joining(", "))
-        val returnTypeDescription = Optional.ofNullable(returnType)
-                .map { type: ResolvedType -> type.assignableType().simpleName }
-                .orElse("void")
-        val name = method.name
-        val fullSignature = method.toGenericString()
-        return String.format(
-                "'%s %s(%s)' [%s]",
-                returnTypeDescription,
-                name,
-                parametersString,
-                fullSignature)
+        val parametersString = parameters.joinToString { "${it.type.simpleDescription()} ${it.parameter.name}" }
+        val returnTypeDescription = returnType?.assignableType()?.simpleName ?: "void"
+        return "'$returnTypeDescription ${method.name}($parametersString)' [${method.toGenericString()}]"
     }
 
     companion object {
-        @JvmStatic
         fun resolveMethodsWithResolvableTypeVariables(reflectMaid: ReflectMaid,
                                                       fullType: ClassType): List<ResolvedMethod> {
             val type = fullType.assignableType()
@@ -103,9 +86,9 @@ data class ResolvedMethod(val returnType: ResolvedType?,
                     }
         }
 
-        fun resolveMethod(reflectMaid: ReflectMaid,
-                          method: Method,
-                          context: ClassType): ResolvedMethod {
+        private fun resolveMethod(reflectMaid: ReflectMaid,
+                                  method: Method,
+                                  context: ClassType): ResolvedMethod {
             val genericReturnType = method.genericReturnType
             val parameters = ResolvedParameter.resolveParameters(reflectMaid, method, context)
             val returnType: ResolvedType? = if (genericReturnType !== Void.TYPE) {

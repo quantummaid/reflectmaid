@@ -19,15 +19,8 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.exceptions;
+package de.quantummaid.reflectmaid.util;
 
-public final class GenericTypeException extends RuntimeException {
-
-    private GenericTypeException(final String message) {
-        super(message);
-    }
-
-    public static GenericTypeException genericTypeException(final String message) {
-        return new GenericTypeException(message);
-    }
+public interface ExceptionThrowingLambda {
+    void run() throws Exception;
 }

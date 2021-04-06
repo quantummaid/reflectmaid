@@ -21,7 +21,6 @@
 
 package de.quantummaid.reflectmaid;
 
-import de.quantummaid.reflectmaid.exceptions.GenericTypeException;
 import de.quantummaid.reflectmaid.resolvedtype.ArrayType;
 import de.quantummaid.reflectmaid.resolvedtype.ClassType;
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType;
@@ -31,7 +30,7 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField;
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod;
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter;
 import de.quantummaid.reflectmaid.types.*;
-import de.quantummaid.reflectmaid.validators.NotNullValidator;
+import de.quantummaid.reflectmaid.util.ExceptionThrowingLambda;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -280,7 +279,7 @@ public final class ReflectMaidSpecs {
     @Test
     public void syntheticFeaturesAreIgnored() {
         final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
-        final ClassType classType = (ClassType) reflectMaid.resolve(NotNullValidator.class);
+        final ClassType classType = (ClassType) reflectMaid.resolve(ReflectMaid.class);
         assertThat(classType.fields(), hasSize(0));
         assertThat(classType.constructors(), hasSize(1));
         assertThat(classType.methods(), hasSize(1));

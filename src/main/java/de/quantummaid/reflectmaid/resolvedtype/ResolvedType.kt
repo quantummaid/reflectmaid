@@ -47,6 +47,9 @@ interface ResolvedType {
     val isAnnotation: Boolean
         get() = false
 
+    val isArray: Boolean
+        get() = false
+
     val isWildcard: Boolean
 
     fun description(): String

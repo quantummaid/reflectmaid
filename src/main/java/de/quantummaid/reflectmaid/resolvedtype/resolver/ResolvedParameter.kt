@@ -21,12 +21,9 @@
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
-import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.ReflectMaid
-import java.util.Arrays
-import java.util.stream.Collectors
-import de.quantummaid.reflectmaid.validators.NotNullValidator
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import java.lang.reflect.Executable
 import java.lang.reflect.Parameter
 
@@ -38,23 +35,14 @@ data class ResolvedParameter(val type: ResolvedType,
     }
 
     companion object {
-        @JvmStatic
         fun resolveParameters(reflectMaid: ReflectMaid,
                               executable: Executable,
                               fullType: ClassType): List<ResolvedParameter> {
-            return Arrays.stream(executable.parameters)
-                    .map { parameter: Parameter -> resolveParameter(reflectMaid, fullType, parameter) }
-                    .collect(Collectors.toList())
-        }
-
-        private fun resolveParameter(reflectMaid: ReflectMaid,
-                                     declaringType: ClassType,
-                                     parameter: Parameter): ResolvedParameter {
-            NotNullValidator.validateNotNull(declaringType, "declaringType")
-            NotNullValidator.validateNotNull(parameter, "parameter")
-            val parameterizedType = parameter.parameterizedType
-            val resolvedType = reflectMaid.resolve(fromReflectionType<Any>(parameterizedType, declaringType))
-            return ResolvedParameter(resolvedType, parameter)
+            return executable.parameters.map {
+                val parameterizedType = it.parameterizedType
+                val resolvedType = reflectMaid.resolve(fromReflectionType<Any>(parameterizedType, fullType))
+                ResolvedParameter(resolvedType, it)
+            }
         }
     }
 }

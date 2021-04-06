@@ -2,7 +2,6 @@ package de.quantummaid.reflectmaid
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.GenericType.Companion.genericType
-import de.quantummaid.reflectmaid.exceptions.GenericTypeException
 import de.quantummaid.reflectmaid.resolvedtype.ArrayType.Companion.fromArrayClass
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
@@ -97,9 +96,9 @@ class ReflectMaid(private val cache: ReflectionCache) {
                                                          variableValues: List<ResolvedType>) {
         if (variableValues.size != variableNames.size) {
             val variables = variableNames.stream()
-                    .map { obj: TypeVariableName -> obj.name() }
+                    .map { it.name }
                     .collect(Collectors.joining(", ", "[", "]"))
-            throw GenericTypeException.genericTypeException(
+            throw GenericTypeException(
                     "type '${type.name}' contains the following type variables that need " +
                             "to be filled in in order to create a ${GenericType::class.java.simpleName} object: ${variables}"
             )
@@ -113,3 +112,5 @@ class ReflectMaid(private val cache: ReflectionCache) {
         }
     }
 }
+
+class GenericTypeException(message: String) : RuntimeException(message)

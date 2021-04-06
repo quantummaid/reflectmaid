@@ -1,8 +1,10 @@
 package de.quantummaid.reflectmaid
 
+import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.empty
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.InputStream
 
@@ -34,9 +36,24 @@ class SealedClassesSpecs {
     }
 
     @Test
-    fun sealedSubsclassesAreEmpty() {
+    fun sealedSubclassesForJavaClassesAreEmpty() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<InputStream>()
+        assertThat(resolvedType.sealedSubclasses(), empty())
+    }
+
+    @Test
+    fun sealedSubclassesForArraysAreEmpty() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolvedType = reflectMaid.resolve<Array<SealedClass>>()
+        assertTrue(resolvedType.isArray)
+        assertThat(resolvedType.sealedSubclasses(), empty())
+    }
+
+    @Test
+    fun sealedSubclassesForWildcardsAreEmpty() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolvedType = reflectMaid.resolve(wildcard())
         assertThat(resolvedType.sealedSubclasses(), empty())
     }
 }

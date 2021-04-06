@@ -24,7 +24,6 @@ import de.quantummaid.reflectmaid.GenericType
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.ThirdPartyAnnotation.Companion.thirdPartyAnnotation
 import de.quantummaid.reflectmaid.TypeVariableName
-import de.quantummaid.reflectmaid.exceptions.UnresolvableTypeVariableException
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor.Companion.resolveConstructors
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
@@ -32,7 +31,6 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField.Companion.
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod.Companion.resolveMethodsWithResolvableTypeVariables
 import java.lang.reflect.Modifier
-import java.util.stream.Collectors
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 
@@ -45,7 +43,7 @@ data class ClassType(private val clazz: Class<*>,
     private var sealedSubclasses: Cached<List<ResolvedType>> = Cached { resolveSealedSubclasses(this, reflectMaid) }
 
     fun typeParameter(name: TypeVariableName): ResolvedType {
-        require(typeParameters.containsKey(name)) { "No type parameter with the name: " + name.name() }
+        require(typeParameters.containsKey(name)) { "No type parameter with the name: " + name.name }
         return typeParameters[name]!!
     }
 
@@ -73,13 +71,16 @@ data class ClassType(private val clazz: Class<*>,
         return fields.get()
     }
 
+    override fun sealedSubclasses(): List<ResolvedType> {
+        return sealedSubclasses.get()
+    }
+
     override fun description(): String {
         if (typeParameters.isEmpty()) {
             return clazz.name
         }
-        val parametersString = typeParameters().stream()
-                .map { obj: ResolvedType -> obj.description() }
-                .collect(Collectors.joining(", ", "<", ">"))
+        val parametersString = typeParameters()
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description() }
         return clazz.name + parametersString
     }
 
@@ -87,9 +88,8 @@ data class ClassType(private val clazz: Class<*>,
         if (typeParameters.isEmpty()) {
             return clazz.simpleName
         }
-        val parametersString = typeParameters().stream()
-                .map { it.simpleDescription() }
-                .collect(Collectors.joining(", ", "<", ">"))
+        val parametersString = typeParameters()
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription() }
         return clazz.simpleName + parametersString
     }
 
@@ -124,10 +124,6 @@ data class ClassType(private val clazz: Class<*>,
         return clazz
     }
 
-    override fun sealedSubclasses(): List<ResolvedType> {
-        return sealedSubclasses.get()
-    }
-
     companion object {
         @JvmStatic
         fun fromClassWithoutGenerics(reflectMaid: ReflectMaid,
@@ -136,7 +132,7 @@ data class ClassType(private val clazz: Class<*>,
                 throw UnsupportedOperationException()
             }
             if (type.typeParameters.isNotEmpty()) {
-                throw UnsupportedOperationException(String.format("Type variables of '%s' cannot be resolved", type.name))
+                throw UnsupportedOperationException("Type variables of '${type.name}' cannot be resolved")
             }
             return fromClassWithGenerics(reflectMaid, type, emptyMap())
         }

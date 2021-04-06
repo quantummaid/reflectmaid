@@ -18,9 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package de.quantummaid.reflectmaid.resolvedtype
 
-package de.quantummaid.reflectmaid;
+import de.quantummaid.reflectmaid.TypeVariableName
 
-public interface ExceptionThrowingLambda {
-    void run() throws Exception;
+class UnresolvableTypeVariableException private constructor(message: String) : RuntimeException(message) {
+    companion object {
+        fun unresolvableTypeVariableException(variableName: TypeVariableName): UnresolvableTypeVariableException {
+            val message = "No type variable with name '${variableName.name}'"
+            return UnresolvableTypeVariableException(message)
+        }
+    }
 }

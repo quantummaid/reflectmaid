@@ -22,7 +22,6 @@ package de.quantummaid.reflectmaid.resolvedtype
 
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
-import de.quantummaid.reflectmaid.validators.NotNullValidator
 import java.lang.reflect.Array
 
 data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
@@ -45,6 +44,8 @@ data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
         get() = false
     override val isWildcard: Boolean
         get() = false
+    override val isArray: Boolean
+        get() = true
 
     override fun typeParameters(): List<ResolvedType> {
         return listOf(componentType)
@@ -58,7 +59,6 @@ data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
         @JvmStatic
         fun fromArrayClass(reflectMaid: ReflectMaid?,
                            clazz: Class<*>): ArrayType {
-            NotNullValidator.validateNotNull(clazz, "clazz")
             if (!clazz.isArray) {
                 throw UnsupportedOperationException()
             }
@@ -68,7 +68,6 @@ data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
 
         @JvmStatic
         fun arrayType(componentType: ResolvedType): ArrayType {
-            NotNullValidator.validateNotNull(componentType, "componentType")
             return ArrayType(componentType)
         }
     }

@@ -18,24 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package de.quantummaid.reflectmaid
 
-package de.quantummaid.reflectmaid.exceptions;
+import java.lang.reflect.GenericDeclaration
+import java.lang.reflect.TypeVariable
+import java.util.*
+import java.util.stream.Collectors
 
-import de.quantummaid.reflectmaid.TypeVariableName;
+data class TypeVariableName(val name: String) {
 
-import static de.quantummaid.reflectmaid.validators.NotNullValidator.validateNotNull;
-import static java.lang.String.format;
+    companion object {
+        @JvmStatic
+        fun typeVariableName(name: String): TypeVariableName {
+            return TypeVariableName(name)
+        }
 
-public final class UnresolvableTypeVariableException extends RuntimeException {
+        @JvmStatic
+        fun typeVariableName(typeVariable: TypeVariable<*>): TypeVariableName {
+            return typeVariableName(typeVariable.name)
+        }
 
-    private UnresolvableTypeVariableException(final String message) {
-        super(message);
-    }
-
-    public static UnresolvableTypeVariableException unresolvableTypeVariableException(
-            final TypeVariableName variableName) {
-        validateNotNull(variableName, "variableName");
-        final String message = format("No type variable with name '%s'", variableName.name());
-        return new UnresolvableTypeVariableException(message);
+        @JvmStatic
+        fun typeVariableNamesOf(type: GenericDeclaration): List<TypeVariableName> {
+            return Arrays.stream(type.typeParameters)
+                    .map { typeVariable: TypeVariable<*> -> typeVariableName(typeVariable) }
+                    .collect(Collectors.toList())
+        }
     }
 }

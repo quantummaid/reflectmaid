@@ -28,7 +28,6 @@ import java.lang.reflect.Modifier
 
 data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
                                val constructor: Constructor<*>) {
-
     val isPublic: Boolean
         get() {
             val modifiers = constructor.modifiers
@@ -40,19 +39,14 @@ data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
     }
 
     companion object {
-        @JvmStatic
         fun resolveConstructors(reflectMaid: ReflectMaid,
                                 fullType: ClassType): List<ResolvedConstructor> {
             return fullType.assignableType().declaredConstructors
-                    .filter {  !it.isSynthetic }
-                    .map { resolveConstructor(reflectMaid, it, fullType) }
-        }
-
-        fun resolveConstructor(reflectMaid: ReflectMaid,
-                               constructor: Constructor<*>,
-                               fullType: ClassType): ResolvedConstructor {
-            val parameters = resolveParameters(reflectMaid, constructor, fullType)
-            return ResolvedConstructor(parameters, constructor)
+                    .filter { !it.isSynthetic }
+                    .map {
+                        val parameters = resolveParameters(reflectMaid, it, fullType)
+                        ResolvedConstructor(parameters, it)
+                    }
         }
     }
 }
