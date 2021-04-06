@@ -23,6 +23,11 @@ class ReflectMaid(private val cache: ReflectionCache) {
         return resolve(genericType)
     }
 
+    inline fun <reified T : Any> resolve(): ResolvedType {
+        val genericType = genericType<T>()
+        return resolve(genericType)
+    }
+
     fun resolve(genericType: GenericType<*>): ResolvedType {
         return cache.lookUp(genericType) { resolveInternal(it) }
     }
@@ -35,11 +40,7 @@ class ReflectMaid(private val cache: ReflectionCache) {
         return when (genericType) {
             is GenericTypeFromClass -> resolveClass(genericType)
             is GenericTypeFromToken -> {
-                val subclass: Class<*> = genericType.typeToken.javaClass
-                val genericSupertype = subclass.genericSuperclass
-                val subclassType = fromClassWithoutGenerics(this, subclass)
-                val interfaceType = resolve(fromReflectionType<Any>(genericSupertype, subclassType)) as ClassType
-                interfaceType.typeParameter(TypeVariableName.typeVariableName("T"))
+                resolveFromTypeToken(genericType.typeToken)
             }
             is GenericTypeFromKClass -> {
                 return resolve(GenericTypeFromClass<Any>(genericType.kClass.java, genericType.typeVariables))
@@ -55,6 +56,14 @@ class ReflectMaid(private val cache: ReflectionCache) {
                 resolveType(this, type, context)
             }
         }
+    }
+
+    private fun resolveFromTypeToken(typeToken: TypeToken<*>): ResolvedType {
+        val subclass: Class<*> = typeToken.javaClass
+        val genericSupertype = subclass.genericSuperclass
+        val subclassType = fromClassWithoutGenerics(this, subclass)
+        val interfaceType = resolve(fromReflectionType<Any>(genericSupertype, subclassType)) as ClassType
+        return interfaceType.typeParameter(TypeVariableName.typeVariableName("T"))
     }
 
     private fun resolveClass(genericType: GenericTypeFromClass<*>): ResolvedType {

@@ -22,25 +22,41 @@ package de.quantummaid.reflectmaid.resolvedtype
 
 interface ResolvedType {
     fun assignableType(): Class<*>
+
     fun typeParameters(): List<ResolvedType>
+
     val isAbstract: Boolean
+
     val isInterface: Boolean
+
     val isPublic: Boolean
         get() = true
+
     val isAnonymousClass: Boolean
         get() = false
+
     val isInnerClass: Boolean
         get() = false
+
     val isLocalClass: Boolean
         get() = false
+
     val isStatic: Boolean
         get() = false
+
     val isAnnotation: Boolean
         get() = false
+
     val isWildcard: Boolean
+
     fun description(): String
+
     fun simpleDescription(): String {
         return description()
+    }
+
+    fun sealedSubclasses(): List<ResolvedType> {
+        return emptyList()
     }
 
     val isInstantiatable: Boolean

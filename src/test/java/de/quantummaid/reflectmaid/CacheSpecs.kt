@@ -15,6 +15,14 @@ import org.junit.jupiter.api.Test
 class CacheSpecs {
 
     @Test
+    fun typeVariableGetsRegisteredInCache() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        reflectMaid.resolve<List<String>>()
+        val registeredTypes = reflectMaid.registeredTypes()
+        assertThat(registeredTypes.map { it.simpleDescription() }, contains("String", "List<String>", "TypeToken<List<String>>"))
+    }
+
+    @Test
     fun reflectMaidCanResolveDirectlyFromJavaClass() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType1 = reflectMaid.resolve(String::class.java)
@@ -27,6 +35,14 @@ class CacheSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType1 = reflectMaid.resolve(String::class)
         val resolvedType2 = reflectMaid.resolve(genericType(String::class.java))
+        assertTrue(resolvedType1 === resolvedType2)
+    }
+
+    @Test
+    fun reflectMaidCanResolveDirectlyFromTypeToken() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolvedType1 = reflectMaid.resolve(String::class)
+        val resolvedType2 = reflectMaid.resolve<String>()
         assertTrue(resolvedType1 === resolvedType2)
     }
 

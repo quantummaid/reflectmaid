@@ -20,7 +20,9 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype
 
+import de.quantummaid.reflectmaid.GenericType
 import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.ThirdPartyAnnotation.Companion.thirdPartyAnnotation
 import de.quantummaid.reflectmaid.TypeVariableName
 import de.quantummaid.reflectmaid.exceptions.UnresolvableTypeVariableException
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
@@ -29,9 +31,10 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField.Companion.resolvedFields
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod.Companion.resolveMethodsWithResolvableTypeVariables
-import de.quantummaid.reflectmaid.validators.NotNullValidator
 import java.lang.reflect.Modifier
 import java.util.stream.Collectors
+import kotlin.jvm.internal.Reflection
+import kotlin.reflect.KClass
 
 data class ClassType(private val clazz: Class<*>,
                      private val typeParameters: Map<TypeVariableName, ResolvedType>,
@@ -39,6 +42,7 @@ data class ClassType(private val clazz: Class<*>,
     private var methods: Cached<List<ResolvedMethod>> = Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this) }
     private var constructors: Cached<List<ResolvedConstructor>> = Cached { resolveConstructors(reflectMaid, this) }
     private var fields: Cached<List<ResolvedField>> = Cached { resolvedFields(reflectMaid, this) }
+    private var sealedSubclasses: Cached<List<ResolvedType>> = Cached { resolveSealedSubclasses(this, reflectMaid) }
 
     fun typeParameter(name: TypeVariableName): ResolvedType {
         require(typeParameters.containsKey(name)) { "No type parameter with the name: " + name.name() }
@@ -84,7 +88,7 @@ data class ClassType(private val clazz: Class<*>,
             return clazz.simpleName
         }
         val parametersString = typeParameters().stream()
-                .map { obj: ResolvedType -> obj.simpleDescription() }
+                .map { it.simpleDescription() }
                 .collect(Collectors.joining(", ", "<", ">"))
         return clazz.simpleName + parametersString
     }
@@ -120,11 +124,14 @@ data class ClassType(private val clazz: Class<*>,
         return clazz
     }
 
+    override fun sealedSubclasses(): List<ResolvedType> {
+        return sealedSubclasses.get()
+    }
+
     companion object {
         @JvmStatic
         fun fromClassWithoutGenerics(reflectMaid: ReflectMaid,
                                      type: Class<*>): ClassType {
-            NotNullValidator.validateNotNull(type, "type")
             if (type.isArray) {
                 throw UnsupportedOperationException()
             }
@@ -138,8 +145,6 @@ data class ClassType(private val clazz: Class<*>,
         fun fromClassWithGenerics(reflectMaid: ReflectMaid,
                                   type: Class<*>,
                                   typeParameters: Map<TypeVariableName, ResolvedType>): ClassType {
-            NotNullValidator.validateNotNull(type, "type")
-            NotNullValidator.validateNotNull(typeParameters, "typeParameters")
             if (type.isArray) {
                 throw UnsupportedOperationException()
             }
@@ -148,7 +153,7 @@ data class ClassType(private val clazz: Class<*>,
     }
 }
 
-class Cached<T>(val supplier: () -> T) {
+class Cached<T>(private val supplier: () -> T) {
     private var cached: T? = null
 
     fun get(): T {
@@ -164,5 +169,23 @@ class Cached<T>(val supplier: () -> T) {
 
     override fun hashCode(): Int {
         return 0
+    }
+}
+
+private val KOTLIN_METADATA = thirdPartyAnnotation("kotlin.Metadata")
+
+private fun isKotlinClass(resolvedType: ResolvedType): Boolean {
+    return KOTLIN_METADATA.isAnnotatedWith(resolvedType)
+}
+
+private fun resolveSealedSubclasses(classType: ClassType, reflectMaid: ReflectMaid): List<ResolvedType> {
+    return if (isKotlinClass(classType)) {
+        val kotlinClass = Reflection.createKotlinClass(classType.assignableType())
+        @Suppress("UNCHECKED_CAST", "NO_REFLECTION_IN_CLASS_PATH")
+        (kotlinClass.sealedSubclasses as List<KClass<Any>>)
+                .map { GenericType.genericType(it) }
+                .map { reflectMaid.resolve(it) }
+    } else {
+        emptyList()
     }
 }

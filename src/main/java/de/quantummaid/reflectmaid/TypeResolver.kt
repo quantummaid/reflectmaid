@@ -20,17 +20,18 @@
  */
 package de.quantummaid.reflectmaid
 
-import de.quantummaid.reflectmaid.resolvedtype.WildcardedType.Companion.wildcardType
-import de.quantummaid.reflectmaid.resolvedtype.ArrayType.Companion.arrayType
-import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
-import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithGenerics
-import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.exceptions.UnsupportedJvmFeatureInTypeException
-import de.quantummaid.reflectmaid.validators.NotNullValidator
 import de.quantummaid.reflectmaid.resolvedtype.ArrayType
+import de.quantummaid.reflectmaid.resolvedtype.ArrayType.Companion.arrayType
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithGenerics
+import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import de.quantummaid.reflectmaid.resolvedtype.WildcardedType.Companion.wildcardType
+import de.quantummaid.reflectmaid.validators.NotNullValidator
 import java.lang.reflect.*
-import java.util.HashMap
+import java.util.*
 
 internal fun resolveType(reflectMaid: ReflectMaid,
                          type: Type,
@@ -85,7 +86,7 @@ private fun resolveParameterizedType(reflectMaid: ReflectMaid,
     val actualTypeArguments = parameterizedType.actualTypeArguments
     val typeParameters: MutableMap<TypeVariableName, ResolvedType> = HashMap(actualTypeArguments.size)
     for (i in actualTypeArguments.indices) {
-        val resolvedTypeArgument = resolveType(reflectMaid, actualTypeArguments[i], context)
+        val resolvedTypeArgument = reflectMaid.resolve(fromReflectionType<Any>(actualTypeArguments[i], context))
         val name = typeVariableNames[i]
         typeParameters[name] = resolvedTypeArgument
     }
