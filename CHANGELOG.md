@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.2.4/jar) - 2021-04-07
+### Changed
+- Module structure.
+
 ## [0.2.3](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.2.3/jar) - 2021-03-28
 ### Added
 - @JvmStatic for some factory methods.
