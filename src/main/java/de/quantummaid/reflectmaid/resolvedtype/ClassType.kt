@@ -24,6 +24,9 @@ import de.quantummaid.reflectmaid.GenericType
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.ThirdPartyAnnotation.Companion.thirdPartyAnnotation
 import de.quantummaid.reflectmaid.TypeVariableName
+import de.quantummaid.reflectmaid.languages.Language
+import de.quantummaid.reflectmaid.languages.Language.Companion.JAVA
+import de.quantummaid.reflectmaid.languages.Language.Companion.KOTLIN
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor.Companion.resolveConstructors
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
@@ -37,13 +40,14 @@ import kotlin.reflect.KClass
 data class ClassType(private val clazz: Class<*>,
                      private val typeParameters: Map<TypeVariableName, ResolvedType>,
                      private val reflectMaid: ReflectMaid) : ResolvedType {
-    private var methods: Cached<List<ResolvedMethod>> = Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this) }
+    private var methods: Cached<List<ResolvedMethod>> = Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this, language()) }
     private var constructors: Cached<List<ResolvedConstructor>> = Cached { resolveConstructors(reflectMaid, this) }
     private var fields: Cached<List<ResolvedField>> = Cached { resolvedFields(reflectMaid, this) }
     private var sealedSubclasses: Cached<List<ResolvedType>> = Cached { resolveSealedSubclasses(this, reflectMaid) }
+    private var language: Cached<Language> = Cached { determineLanguage(this) }
 
     fun typeParameter(name: TypeVariableName): ResolvedType {
-        require(typeParameters.containsKey(name)) { "No type parameter with the name: " + name.name }
+        require(typeParameters.containsKey(name)) { "No type parameter with the name: ${name.name}" }
         return typeParameters[name]!!
     }
 
@@ -59,15 +63,15 @@ data class ClassType(private val clazz: Class<*>,
                 .map { typeParameters[it]!! }
     }
 
-    fun methods(): List<ResolvedMethod> {
+    override fun methods(): List<ResolvedMethod> {
         return methods.get()
     }
 
-    fun constructors(): List<ResolvedConstructor> {
+    override fun constructors(): List<ResolvedConstructor> {
         return constructors.get()
     }
 
-    fun fields(): List<ResolvedField> {
+    override fun fields(): List<ResolvedField> {
         return fields.get()
     }
 
@@ -75,21 +79,25 @@ data class ClassType(private val clazz: Class<*>,
         return sealedSubclasses.get()
     }
 
-    override fun description(): String {
+    override fun language(): Language {
+        return language.get()
+    }
+
+    override fun description(language: Language): String {
         if (typeParameters.isEmpty()) {
             return clazz.name
         }
         val parametersString = typeParameters()
-                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description() }
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description(language) }
         return clazz.name + parametersString
     }
 
-    override fun simpleDescription(): String {
+    override fun simpleDescription(language: Language): String {
         if (typeParameters.isEmpty()) {
             return clazz.simpleName
         }
         val parametersString = typeParameters()
-                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription() }
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription(language) }
         return clazz.simpleName + parametersString
     }
 
@@ -169,6 +177,14 @@ class Cached<T>(private val supplier: () -> T) {
 }
 
 private val KOTLIN_METADATA = thirdPartyAnnotation("kotlin.Metadata")
+
+private fun determineLanguage(resolvedType: ResolvedType): Language {
+    return if (isKotlinClass(resolvedType)) {
+        KOTLIN
+    } else {
+        JAVA
+    }
+}
 
 private fun isKotlinClass(resolvedType: ResolvedType): Boolean {
     return KOTLIN_METADATA.isAnnotatedWith(resolvedType)

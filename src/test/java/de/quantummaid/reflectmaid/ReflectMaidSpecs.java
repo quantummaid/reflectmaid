@@ -280,9 +280,9 @@ public final class ReflectMaidSpecs {
     public void syntheticFeaturesAreIgnored() {
         final ReflectMaid reflectMaid = ReflectMaid.aReflectMaid();
         final ClassType classType = (ClassType) reflectMaid.resolve(ReflectMaid.class);
-        assertThat(classType.fields(), hasSize(0));
+        assertThat(classType.fields(), hasSize(2));
         assertThat(classType.constructors(), hasSize(1));
-        assertThat(classType.methods(), hasSize(1));
+        assertThat(classType.methods(), hasSize(10));
     }
 
     @Test

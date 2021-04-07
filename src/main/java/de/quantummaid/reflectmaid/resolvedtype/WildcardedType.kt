@@ -20,6 +20,8 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype
 
+import de.quantummaid.reflectmaid.languages.Language
+
 class WildcardedType : ResolvedType {
     override fun typeParameters(): List<ResolvedType> {
         return emptyList()
@@ -32,13 +34,9 @@ class WildcardedType : ResolvedType {
     override val isWildcard: Boolean
         get() = true
 
-    override fun description(): String {
-        return "?"
-    }
+    override fun description(language: Language) = language.wildcard()
 
-    override fun assignableType(): Class<*> {
-        return Any::class.java
-    }
+    override fun assignableType() = Any::class.java
 
     override fun equals(other: Any?): Boolean {
         return other is WildcardedType

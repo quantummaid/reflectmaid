@@ -22,6 +22,8 @@ package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.languages.Language
+import de.quantummaid.reflectmaid.languages.ParameterData
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException
@@ -31,7 +33,8 @@ import java.util.*
 
 data class ResolvedMethod(val returnType: ResolvedType?,
                           val parameters: List<ResolvedParameter>,
-                          val method: Method) {
+                          val method: Method,
+                          val language: Language) {
 
     fun returnType(): Optional<ResolvedType> {
         return Optional.ofNullable(returnType)
@@ -49,9 +52,7 @@ data class ResolvedMethod(val returnType: ResolvedType?,
         return true
     }
 
-    fun name(): String {
-        return method.name
-    }
+    fun name(): String = method.name
 
     val isPublic: Boolean
         get() {
@@ -65,21 +66,25 @@ data class ResolvedMethod(val returnType: ResolvedType?,
             return Modifier.isStatic(modifiers)
         }
 
-    fun describe(): String {
-        val parametersString = parameters.joinToString { "${it.type.simpleDescription()} ${it.parameter.name}" }
-        val returnTypeDescription = returnType?.assignableType()?.simpleName ?: "void"
-        return "'$returnTypeDescription ${method.name}($parametersString)' [${method.toGenericString()}]"
+    fun describe() = describe(language)
+
+    fun describe(language: Language): String {
+        val parameterData = parameters.map { ParameterData(it.parameter.name, it.type.simpleDescription(language)) }
+        val returnTypeDescription = returnType?.simpleDescription(language)
+        val methodDescription = language.method(method.name, parameterData, returnTypeDescription)
+        return "'$methodDescription' [${method.toGenericString()}]"
     }
 
     companion object {
         fun resolveMethodsWithResolvableTypeVariables(reflectMaid: ReflectMaid,
-                                                      fullType: ClassType): List<ResolvedMethod> {
+                                                      fullType: ClassType,
+                                                      language: Language): List<ResolvedMethod> {
             val type = fullType.assignableType()
             return type.declaredMethods
                     .filter { !it.isSynthetic }
                     .mapNotNull {
                         try {
-                            resolveMethod(reflectMaid, it, fullType)
+                            resolveMethod(reflectMaid, it, fullType, language)
                         } catch (e: UnresolvableTypeVariableException) {
                             null
                         }
@@ -88,7 +93,8 @@ data class ResolvedMethod(val returnType: ResolvedType?,
 
         private fun resolveMethod(reflectMaid: ReflectMaid,
                                   method: Method,
-                                  context: ClassType): ResolvedMethod {
+                                  context: ClassType,
+                                  language: Language): ResolvedMethod {
             val genericReturnType = method.genericReturnType
             val parameters = ResolvedParameter.resolveParameters(reflectMaid, method, context)
             val returnType: ResolvedType? = if (genericReturnType !== Void.TYPE) {
@@ -96,7 +102,7 @@ data class ResolvedMethod(val returnType: ResolvedType?,
             } else {
                 null
             }
-            return ResolvedMethod(returnType, parameters, method)
+            return ResolvedMethod(returnType, parameters, method, language)
         }
     }
 }

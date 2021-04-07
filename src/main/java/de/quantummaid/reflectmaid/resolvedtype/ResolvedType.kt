@@ -20,6 +20,12 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype
 
+import de.quantummaid.reflectmaid.languages.Language
+import de.quantummaid.reflectmaid.languages.Language.Companion.JAVA
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
+import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
+
 interface ResolvedType {
     fun assignableType(): Class<*>
 
@@ -52,11 +58,21 @@ interface ResolvedType {
 
     val isWildcard: Boolean
 
-    fun description(): String
+    fun description(language: Language): String
 
-    fun simpleDescription(): String {
-        return description()
-    }
+    fun description() = description(language())
+
+    fun simpleDescription(language: Language) = description()
+
+    fun simpleDescription() = simpleDescription(language())
+
+    fun methods(): List<ResolvedMethod> = emptyList()
+
+    fun constructors(): List<ResolvedConstructor> = emptyList()
+
+    fun fields(): List<ResolvedField> = emptyList()
+
+    fun language(): Language = JAVA
 
     fun sealedSubclasses(): List<ResolvedType> {
         return emptyList()

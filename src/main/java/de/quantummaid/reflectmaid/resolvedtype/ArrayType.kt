@@ -21,6 +21,7 @@
 package de.quantummaid.reflectmaid.resolvedtype
 
 import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
 import java.lang.reflect.Array
 
@@ -30,12 +31,14 @@ data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
         return componentType
     }
 
-    override fun simpleDescription(): String {
-        return componentType.simpleDescription() + "[]"
+    override fun simpleDescription(language: Language): String {
+        val componentTypeDescription = componentType.simpleDescription(language)
+        return language.array(componentTypeDescription)
     }
 
-    override fun description(): String {
-        return componentType.description() + "[]"
+    override fun description(language: Language): String {
+        val componentTypeDescription = componentType.description(language)
+        return language.array(componentTypeDescription)
     }
 
     override val isAbstract: Boolean
