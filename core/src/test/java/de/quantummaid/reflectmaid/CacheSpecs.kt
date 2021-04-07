@@ -6,7 +6,7 @@ import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.types.TypeWithFields
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -19,7 +19,7 @@ class CacheSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         reflectMaid.resolve<List<String>>()
         val registeredTypes = reflectMaid.registeredTypes()
-        assertThat(registeredTypes.map { it.simpleDescription() }, contains("String", "List<String>", "TypeToken<List<String>>"))
+        assertThat(registeredTypes.map { it.simpleDescription() }, containsInAnyOrder("String", "List<String>", "TypeToken<List<String>>"))
     }
 
     @Test
@@ -57,7 +57,7 @@ class CacheSpecs {
         val registeredTypes = reflectMaid.registeredTypes()
 
         assertThat(registeredTypes, hasSize(2))
-        assertThat(registeredTypes, contains(stringResolvedType, anyResolvedType))
+        assertThat(registeredTypes, containsInAnyOrder(stringResolvedType, anyResolvedType))
     }
 
     @Test

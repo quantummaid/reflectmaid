@@ -21,7 +21,10 @@
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
+import de.quantummaid.reflectmaid.Getter
 import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.Setter
+import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import java.lang.reflect.Field
@@ -30,7 +33,10 @@ import java.util.*
 
 data class ResolvedField(val name: String,
                          val type: ResolvedType,
-                         val field: Field) {
+                         val field: Field,
+                         val reflectMaid: ReflectMaid) {
+    private val getter: Cached<Getter> = Cached { reflectMaid.executorFactory.createFieldGetter(this) }
+    private val setter: Cached<Setter> = Cached { reflectMaid.executorFactory.createFieldSetter(this) }
 
     val isPublic: Boolean
         get() {
@@ -77,6 +83,10 @@ data class ResolvedField(val name: String,
         return joiner.toString()
     }
 
+    fun createGetter() = getter.get()
+
+    fun createSetter() = setter.get()
+
     companion object {
         fun resolvedFields(reflectMaid: ReflectMaid,
                            fullType: ClassType): List<ResolvedField> {
@@ -85,7 +95,7 @@ data class ResolvedField(val name: String,
                     .filter { !it.isSynthetic }
                     .map {
                         val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))
-                        ResolvedField(it.name, resolved, it)
+                        ResolvedField(it.name, resolved, it, reflectMaid)
                     }
         }
     }

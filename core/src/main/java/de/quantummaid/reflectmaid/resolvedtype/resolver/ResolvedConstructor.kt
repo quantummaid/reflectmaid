@@ -20,14 +20,19 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
+import de.quantummaid.reflectmaid.Executor
 import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter.Companion.resolveParameters
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
-                               val constructor: Constructor<*>) {
+                               val constructor: Constructor<*>,
+                               val reflectMaid: ReflectMaid) {
+    private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createConstructorExecutor(this) }
+
     val isPublic: Boolean
         get() {
             val modifiers = constructor.modifiers
@@ -38,6 +43,8 @@ data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
         return constructor.toGenericString()
     }
 
+    fun createExecutor() = executor.get()
+
     companion object {
         fun resolveConstructors(reflectMaid: ReflectMaid,
                                 fullType: ClassType): List<ResolvedConstructor> {
@@ -45,7 +52,7 @@ data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
                     .filter { !it.isSynthetic }
                     .map {
                         val parameters = resolveParameters(reflectMaid, it, fullType)
-                        ResolvedConstructor(parameters, it)
+                        ResolvedConstructor(parameters, it, reflectMaid)
                     }
         }
     }

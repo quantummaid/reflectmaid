@@ -10,7 +10,8 @@ import de.quantummaid.reflectmaid.resolvedtype.WildcardedType
 import java.util.stream.Collectors
 import kotlin.reflect.KClass
 
-class ReflectMaid(private val cache: ReflectionCache) {
+class ReflectMaid(private val cache: ReflectionCache,
+                  val executorFactory: ExecutorFactory) {
 
     fun resolve(type: Class<*>): ResolvedType {
         val genericType = genericType(type)
@@ -108,7 +109,13 @@ class ReflectMaid(private val cache: ReflectionCache) {
     companion object {
         @JvmStatic
         fun aReflectMaid(): ReflectMaid {
-            return ReflectMaid(ReflectionCache())
+            val executorFactory = ReflectionExecutorFactory()
+            return ReflectMaid(ReflectionCache(), executorFactory)
+        }
+
+        @JvmStatic
+        fun aReflectMaid(executorFactory: ExecutorFactory): ReflectMaid {
+            return ReflectMaid(ReflectionCache(), executorFactory)
         }
     }
 }

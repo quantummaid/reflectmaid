@@ -20,10 +20,12 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
+import de.quantummaid.reflectmaid.Executor
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.languages.ParameterData
+import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException
@@ -34,7 +36,9 @@ import java.util.*
 data class ResolvedMethod(val returnType: ResolvedType?,
                           val parameters: List<ResolvedParameter>,
                           val method: Method,
-                          val language: Language) {
+                          val language: Language,
+                          val reflectMaid: ReflectMaid) {
+    private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createMethodExecutor(this) }
 
     fun returnType(): Optional<ResolvedType> {
         return Optional.ofNullable(returnType)
@@ -75,6 +79,8 @@ data class ResolvedMethod(val returnType: ResolvedType?,
         return "'$methodDescription' [${method.toGenericString()}]"
     }
 
+    fun createExecutor() = executor.get()
+
     companion object {
         fun resolveMethodsWithResolvableTypeVariables(reflectMaid: ReflectMaid,
                                                       fullType: ClassType,
@@ -102,7 +108,7 @@ data class ResolvedMethod(val returnType: ResolvedType?,
             } else {
                 null
             }
-            return ResolvedMethod(returnType, parameters, method, language)
+            return ResolvedMethod(returnType, parameters, method, language, reflectMaid)
         }
     }
 }

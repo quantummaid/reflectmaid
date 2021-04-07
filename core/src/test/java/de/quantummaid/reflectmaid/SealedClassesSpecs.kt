@@ -2,7 +2,7 @@ package de.quantummaid.reflectmaid
 
 import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.empty
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -23,7 +23,7 @@ class SealedClassesSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<SealedClass>()
         val sealedSubclasses = resolvedType.sealedSubclasses()
-        assertThat(sealedSubclasses.map { it.simpleDescription() }, contains("SubClass0", "SubClass1", "SealedSubClass"))
+        assertThat(sealedSubclasses.map { it.simpleDescription() }, containsInAnyOrder("SubClass0", "SubClass1", "SealedSubClass"))
     }
 
     @Test
@@ -32,7 +32,7 @@ class SealedClassesSpecs {
         val resolvedType = reflectMaid.resolve<SealedClass>()
         val sealedSubclasses = resolvedType.sealedSubclasses()
         val nestedSealedSubclasses = sealedSubclasses.flatMap { it.sealedSubclasses() }
-        assertThat(nestedSealedSubclasses.map { it.simpleDescription() }, contains("SubSubClass0", "SubSubClass1"))
+        assertThat(nestedSealedSubclasses.map { it.simpleDescription() }, containsInAnyOrder("SubSubClass0", "SubSubClass1"))
     }
 
     @Test

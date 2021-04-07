@@ -35,4 +35,12 @@
         <Class name="de.quantummaid.reflectmaid.resolvedtype.Cached"/>
         <Bug pattern="EQ_ALWAYS_TRUE"/>
     </Match>
+    <Match>
+        <Class name="de.quantummaid.reflectmaid.ExecutorSpecs"/>
+        <Bug pattern="ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"/>
+    </Match>
+    <Match>
+        <Class name="de.quantummaid.reflectmaid.types.TypeWithPublicFields"/>
+        <Bug pattern="MS_CANNOT_BE_FINAL"/>
+    </Match>
 </FindBugsFilter>

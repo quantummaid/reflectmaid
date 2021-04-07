@@ -25,6 +25,7 @@ import de.quantummaid.reflectmaid.types.KotlinType
 import de.quantummaid.reflectmaid.types.TestType
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.contains
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
 
 class DescriptionSpecs {
@@ -34,7 +35,7 @@ class DescriptionSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<KotlinType>()
         val methods = resolvedType.methods().map { it.describe() }
-        assertThat(methods, contains(
+        assertThat(methods, containsInAnyOrder(
                 "'fun voidMethod(parameter0: String)' [public final void de.quantummaid.reflectmaid.types.KotlinType.voidMethod(java.lang.String)]",
                 "'fun nonVoidMethod(parameter0: String, parameter1: Array<Integer>): String' [public final java.lang.String de.quantummaid.reflectmaid.types.KotlinType.nonVoidMethod(java.lang.String,java.lang.Integer[])]"
         ))
@@ -45,7 +46,7 @@ class DescriptionSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<TestType>()
         val methods = resolvedType.methods().map { it.describe() }
-        assertThat(methods, contains(
+        assertThat(methods, containsInAnyOrder(
                 "'String method()' [public java.lang.String de.quantummaid.reflectmaid.types.TestType.method()]"
         ))
     }
