@@ -32,7 +32,7 @@ class ExecutorSpecs {
                     description == "java.util.Collection<java.lang.String>"
                 }
         val executor = constructor.createExecutor()
-        val result = executor.execute(null, listOf("a", "b", "c"))
+        val result = executor.execute(null, listOf(listOf("a", "b", "c")))
         assertThat(result, instanceOf(ArrayList::class.java))
         assertThat(result as List<*>, contains("a", "b", "c"))
     }
