@@ -40,7 +40,7 @@ class ReflectionMethodExecutor(private val method: ResolvedMethod) : Executor {
 class ReflectionConstructorExecutor(private val constructor: ResolvedConstructor) : Executor {
 
     override fun execute(instance: Any?, parameters: List<Any?>): Any? {
-        return constructor.constructor.newInstance(parameters)
+        return constructor.constructor.newInstance(*parameters.toTypedArray())
     }
 }
 
