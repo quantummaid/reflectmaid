@@ -35,6 +35,7 @@ import java.util.*
 
 data class ResolvedMethod(val returnType: ResolvedType?,
                           val parameters: List<ResolvedParameter>,
+                          val declaringType: ResolvedType,
                           val method: Method,
                           val language: Language,
                           val reflectMaid: ReflectMaid) {
@@ -108,7 +109,7 @@ data class ResolvedMethod(val returnType: ResolvedType?,
             } else {
                 null
             }
-            return ResolvedMethod(returnType, parameters, method, language, reflectMaid)
+            return ResolvedMethod(returnType, parameters, context, method, language, reflectMaid)
         }
     }
 }

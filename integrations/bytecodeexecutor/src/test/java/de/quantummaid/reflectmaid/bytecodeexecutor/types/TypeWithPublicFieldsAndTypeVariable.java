@@ -19,13 +19,9 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.types;
+package de.quantummaid.reflectmaid.bytecodeexecutor.types;
 
-public final class TypeWithPublicFields {
+public final class TypeWithPublicFieldsAndTypeVariable<T> {
     public static String staticField;
-    public String field;
-
-    public static String concat(final String a, final String b) {
-        return a + b;
-    }
+    public T field;
 }

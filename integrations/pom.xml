@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.quantummaid.reflectmaid</groupId>
+        <artifactId>reflectmaid-parent</artifactId>
+        <version>0.2.6</version>
+    </parent>
+
+    <artifactId>integrations-parent</artifactId>
+    <version>0.2.6</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>javapoet</module>
+        <module>bytecodeexecutor</module>
+    </modules>
+
+    <properties>
+        <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
+    </properties>
+</project>

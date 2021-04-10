@@ -10,13 +10,14 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.2.5</version>
+    <version>0.2.6</version>
     <packaging>pom</packaging>
 
     <name>ReflectMaid</name>
 
     <modules>
         <module>core</module>
+        <module>integrations</module>
     </modules>
 
     <properties>
