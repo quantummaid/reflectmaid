@@ -33,6 +33,7 @@ import java.util.*
 
 data class ResolvedField(val name: String,
                          val type: ResolvedType,
+                         val declaringType: ResolvedType,
                          val field: Field,
                          val reflectMaid: ReflectMaid) {
     private val getter: Cached<Getter> = Cached { reflectMaid.executorFactory.createFieldGetter(this) }
@@ -95,7 +96,7 @@ data class ResolvedField(val name: String,
                     .filter { !it.isSynthetic }
                     .map {
                         val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))
-                        ResolvedField(it.name, resolved, it, reflectMaid)
+                        ResolvedField(it.name, resolved, fullType, it, reflectMaid)
                     }
         }
     }

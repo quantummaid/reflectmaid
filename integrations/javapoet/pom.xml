@@ -4,19 +4,13 @@
 
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
-        <artifactId>reflectmaid-parent</artifactId>
+        <artifactId>integrations-parent</artifactId>
         <version>0.2.6</version>
     </parent>
 
-    <artifactId>reflectmaid-core</artifactId>
+    <artifactId>javapoet</artifactId>
 
     <properties>
-        <checkstyle.suppressions.location>
-            ${project.basedir}/src/test/checkstyle/checkstyle-suppressions.xml
-        </checkstyle.suppressions.location>
-        <spotbugs.excludeFilterFile>
-            ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
-        </spotbugs.excludeFilterFile>
         <dependency-update-file-checksum>42f33b16b7099885cd5becc23c104f35</dependency-update-file-checksum>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
         <junit.version>5.7.1</junit.version>
@@ -40,10 +34,14 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
-            <scope>provided</scope>
+            <groupId>de.quantummaid.reflectmaid</groupId>
+            <artifactId>reflectmaid-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -57,30 +55,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test-junit5</artifactId>
-            <version>${kotlin.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-reflect</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>

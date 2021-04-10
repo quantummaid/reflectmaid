@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.types;
+package de.quantummaid.reflectmaid.bytecodeexecutor.types;
 
 public final class TypeWithPublicFields {
     public static String staticField;

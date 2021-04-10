@@ -24,11 +24,13 @@ import de.quantummaid.reflectmaid.Executor
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter.Companion.resolveParameters
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
 data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
+                               val declaringType: ResolvedType,
                                val constructor: Constructor<*>,
                                val reflectMaid: ReflectMaid) {
     private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createConstructorExecutor(this) }
@@ -52,7 +54,7 @@ data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
                     .filter { !it.isSynthetic }
                     .map {
                         val parameters = resolveParameters(reflectMaid, it, fullType)
-                        ResolvedConstructor(parameters, it, reflectMaid)
+                        ResolvedConstructor(parameters, fullType, it, reflectMaid)
                     }
         }
     }

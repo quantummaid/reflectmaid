@@ -22,6 +22,16 @@ class ExecutorSpecs {
     }
 
     @Test
+    fun staticMethodCanBeExecutedByReflection() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolvedType = reflectMaid.resolve<TypeWithPublicFields>()
+        val method = resolvedType.methods().first { it.name() == "concat" }
+        val executor = method.createExecutor()
+        val result = executor.execute(null, listOf("a", "b"))
+        assertThat(result, `is`("ab"))
+    }
+
+    @Test
     fun constructorCanBeExecutedByReflection() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<ArrayList<String>>()
