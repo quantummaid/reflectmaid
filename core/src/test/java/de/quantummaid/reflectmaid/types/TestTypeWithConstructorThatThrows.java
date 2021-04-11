@@ -19,23 +19,11 @@
  * under the License.
  */
 
-package de.quantummaid.reflectmaid.util;
+package de.quantummaid.reflectmaid.types;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+public final class TestTypeWithConstructorThatThrows {
 
-public interface ExceptionThrowingLambda {
-
-    static Exception withException(final ExceptionThrowingLambda runnable) {
-        Exception exception = null;
-        try {
-            runnable.run();
-        } catch (final Exception e) {
-            exception = e;
-        }
-        assertThat(exception, notNullValue());
-        return exception;
+    public TestTypeWithConstructorThatThrows() {
+        throw new UnsupportedOperationException("foo");
     }
-
-    void run() throws Exception;
 }
