@@ -25,6 +25,7 @@
         "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 <suppressions>
     <suppress checks="ExecutableStatementCount|MethodLength|MagicNumber|IllegalCatch" files="ReflectMaidSpecs"/>
+    <suppress checks="IllegalCatch" files="ExceptionThrowingLambda"/>
     <suppress checks="VisibilityModifier" files="TypeWithFields|TypeWithPublicFields"/>
     <suppress checks="TrailingComment" files="GenericType"/>
 </suppressions>

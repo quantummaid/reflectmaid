@@ -30,7 +30,6 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField;
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod;
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter;
 import de.quantummaid.reflectmaid.types.*;
-import de.quantummaid.reflectmaid.util.ExceptionThrowingLambda;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -38,13 +37,14 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import static de.quantummaid.reflectmaid.resolvedtype.ArrayType.fromArrayClass;
-import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithGenerics;
-import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithoutGenerics;
 import static de.quantummaid.reflectmaid.GenericType.genericType;
 import static de.quantummaid.reflectmaid.ReflectMaid.aReflectMaid;
 import static de.quantummaid.reflectmaid.TypeVariableName.typeVariableName;
+import static de.quantummaid.reflectmaid.resolvedtype.ArrayType.fromArrayClass;
+import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithGenerics;
+import static de.quantummaid.reflectmaid.resolvedtype.ClassType.fromClassWithoutGenerics;
 import static de.quantummaid.reflectmaid.resolvedtype.WildcardedType.wildcardType;
+import static de.quantummaid.reflectmaid.util.ExceptionThrowingLambda.withException;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -356,17 +356,6 @@ public final class ReflectMaidSpecs {
         });
         final ReflectMaid reflectMaid = aReflectMaid();
         assertThat(reflectMaid.resolve(type).simpleDescription(), is("List<String>"));
-    }
-
-    private static Exception withException(final ExceptionThrowingLambda runnable) {
-        Exception exception = null;
-        try {
-            runnable.run();
-        } catch (final Exception e) {
-            exception = e;
-        }
-        assertThat(exception, notNullValue());
-        return exception;
     }
 
     private static class InnerClass {

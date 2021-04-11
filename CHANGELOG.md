@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.7](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.2.7/jar) - 2021-04-11
+### Changed
+- Exception handling in reflection executors.
+
 ## [0.2.6](https://search.maven.org/artifact/de.quantummaid.reflectmaid/reflectmaid-parent/0.2.6/jar) - 2021-04-10
 ### Added
 - Integrations.
