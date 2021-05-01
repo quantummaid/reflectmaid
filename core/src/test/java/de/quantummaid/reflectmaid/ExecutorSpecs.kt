@@ -3,7 +3,7 @@ package de.quantummaid.reflectmaid
 import de.quantummaid.reflectmaid.types.TestTypeWithConstructorThatThrows
 import de.quantummaid.reflectmaid.types.TestTypeWithMethodThatThrows
 import de.quantummaid.reflectmaid.types.TypeWithPublicFields
-import de.quantummaid.reflectmaid.util.ExceptionThrowingLambda.withException
+import de.quantummaid.reflectmaid.util.withException
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
@@ -106,8 +106,7 @@ class ExecutorSpecs {
         val resolvedType = reflectMaid.resolve<TestTypeWithConstructorThatThrows>()
         val constructor = resolvedType.constructors()[0]
         val executor = constructor.createExecutor()
-        val exception = withException { executor.execute(null, listOf()) }
-        assertThat(exception, instanceOf(UnsupportedOperationException::class.java))
+        val exception = withException<UnsupportedOperationException> { executor.execute(null, listOf()) }
         assertThat(exception.message, `is`("foo"))
         assertThat(exception.stackTrace[0].className, `is`("de.quantummaid.reflectmaid.types.TestTypeWithConstructorThatThrows"))
     }
@@ -119,8 +118,7 @@ class ExecutorSpecs {
         val method = resolvedType.methods()[0]
         val executor = method.createExecutor()
         val instance = TestTypeWithMethodThatThrows()
-        val exception = withException { executor.execute(instance, listOf()) }
-        assertThat(exception, instanceOf(UnsupportedOperationException::class.java))
+        val exception = withException<UnsupportedOperationException> { executor.execute(instance, listOf()) }
         assertThat(exception.message, `is`("foo"))
         assertThat(exception.stackTrace[0].className, `is`("de.quantummaid.reflectmaid.types.TestTypeWithMethodThatThrows"))
     }

@@ -18,24 +18,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package de.quantummaid.reflectmaid.util
 
-package de.quantummaid.reflectmaid.util;
+import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.MatcherAssert.assertThat
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+fun interface ExceptionThrowingLambda {
+    @Throws(Exception::class)
+    fun run()
 
-public interface ExceptionThrowingLambda {
-
-    static Exception withException(final ExceptionThrowingLambda runnable) {
-        Exception exception = null;
-        try {
-            runnable.run();
-        } catch (final Exception e) {
-            exception = e;
+    companion object {
+        @JvmStatic
+        fun withException(runnable: ExceptionThrowingLambda): Exception {
+            return withException<java.lang.Exception>(runnable)
         }
-        assertThat(exception, notNullValue());
-        return exception;
     }
+}
 
-    void run() throws Exception;
+inline fun <reified T : java.lang.Exception> withException(runnable: ExceptionThrowingLambda): T {
+    var exception: Exception? = null
+    try {
+        runnable.run()
+    } catch (e: Exception) {
+        exception = e
+    }
+    assertThat(exception, notNullValue())
+    assertThat(exception, instanceOf(T::class.java))
+    return (exception as T)
 }
