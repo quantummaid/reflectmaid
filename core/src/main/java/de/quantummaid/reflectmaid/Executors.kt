@@ -1,5 +1,6 @@
 package de.quantummaid.reflectmaid
 
+import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
@@ -22,6 +23,7 @@ interface ExecutorFactory {
     fun createConstructorExecutor(constructor: ResolvedConstructor): Executor
     fun createFieldGetter(field: ResolvedField): Getter
     fun createFieldSetter(field: ResolvedField): Setter
+    fun <T> createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T
 }
 
 class ReflectionExecutorFactory : ExecutorFactory {
@@ -29,6 +31,9 @@ class ReflectionExecutorFactory : ExecutorFactory {
     override fun createConstructorExecutor(constructor: ResolvedConstructor) = ReflectionConstructorExecutor(constructor)
     override fun createFieldGetter(field: ResolvedField) = ReflectionFieldGetter(field)
     override fun createFieldSetter(field: ResolvedField) = ReflectionFieldSetter(field)
+    override fun <T> createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T {
+        return createDynamicProxyUsingInvocationHandler(facadeInterface, handler)
+    }
 }
 
 class ReflectionMethodExecutor(private val method: ResolvedMethod) : Executor {
