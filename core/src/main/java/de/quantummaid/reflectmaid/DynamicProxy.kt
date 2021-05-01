@@ -2,7 +2,6 @@ package de.quantummaid.reflectmaid
 
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
-import java.lang.RuntimeException
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -39,7 +38,10 @@ fun <T> ReflectMaid.createDynamicProxy(facadeInterface: ResolvedType, handler: P
                     "as a dynamic proxy facade"
         )
     }
+    return executorFactory.createDynamicProxy(facadeInterface, handler)
+}
 
+fun <T> createDynamicProxyUsingInvocationHandler(facadeInterface: ResolvedType, handler: ProxyHandler): T {
     val methods = facadeInterface.methods()
         .map { it.method to it }
         .toMap()
