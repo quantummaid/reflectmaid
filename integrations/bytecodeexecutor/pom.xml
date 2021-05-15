@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>0.2.8</version>
+        <version>0.2.9</version>
     </parent>
 
     <artifactId>bytecodeexecutor</artifactId>
@@ -19,7 +19,7 @@
         </checkstyle.suppressions.location>
         <dependency-update-file-checksum>42f33b16b7099885cd5becc23c104f35</dependency-update-file-checksum>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
-        <junit.version>5.7.1</junit.version>
+        <junit.version>5.7.2</junit.version>
     </properties>
 
     <dependencyManagement>
