@@ -8,12 +8,15 @@
         <version>0.2.10</version>
     </parent>
 
-    <artifactId>javapoet</artifactId>
+    <artifactId>typescanner</artifactId>
 
     <properties>
         <dependency-update-file-checksum>42f33b16b7099885cd5becc23c104f35</dependency-update-file-checksum>
         <plugin-update-file-checksum>35fe547b725ca8e71b0d13c8c21894df</plugin-update-file-checksum>
         <junit.version>5.7.2</junit.version>
+        <spotbugs.excludeFilterFile>
+            ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
+        </spotbugs.excludeFilterFile>
     </properties>
 
     <dependencyManagement>
@@ -37,11 +40,6 @@
             <groupId>de.quantummaid.reflectmaid</groupId>
             <artifactId>reflectmaid-core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
-            <version>1.13.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
