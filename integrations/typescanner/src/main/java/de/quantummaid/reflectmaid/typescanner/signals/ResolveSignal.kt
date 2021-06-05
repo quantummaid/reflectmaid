@@ -20,27 +20,25 @@
  */
 package de.quantummaid.reflectmaid.typescanner.signals
 
-import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.states.Resolver
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
 
 data class ResolveSignal<T>(private val resolver: Resolver<T>) : Signal<T> {
 
+    companion object {
+        @JvmStatic
+        fun <T> resolve(resolver: Resolver<T>): Signal<T> {
+            return ResolveSignal(resolver)
+        }
+    }
+
     override fun handleState(definition: StatefulDefinition<T>): StatefulDefinition<T> {
         return definition.resolve(resolver)
     }
 
-    override fun target(): TypeIdentifier? {
-        return null
-    }
+    override fun target() = null
 
     override fun description(): String {
         return "resolve"
-    }
-
-    companion object {
-        fun <T> resolve(resolver: Resolver<T>): Signal<T> {
-            return ResolveSignal(resolver)
-        }
     }
 }

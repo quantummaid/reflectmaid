@@ -25,6 +25,7 @@ import de.quantummaid.reflectmaid.typescanner.factories.StateFactory
 import de.quantummaid.reflectmaid.typescanner.log.StateLog
 import de.quantummaid.reflectmaid.typescanner.log.StateLogBuilder
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementName
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.DetectSignal
 import de.quantummaid.reflectmaid.typescanner.signals.ResolveSignal
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
@@ -47,19 +48,30 @@ class Processor<T>(
         resolver: Resolver<T>,
         onError: OnCollectionError<T>,
         requirementsDescriber: RequirementsDescriber
-    ): Map<TypeIdentifier, CollectionResult<T>> {
+    ): Map<TypeIdentifier, Map<Scope, CollectionResult<T>>> {
         resolveRecursively(detector, resolver, requirementsDescriber)
         val reports = states.collect(requirementsDescriber)
-        val definitions: MutableMap<TypeIdentifier, CollectionResult<T>> = HashMap(reports.size)
-        val all: MutableMap<TypeIdentifier, CollectionResult<T>> = HashMap(reports.size)
-        val failures: MutableMap<TypeIdentifier, Report<T>> = LinkedHashMap()
-        reports.forEach { (type, report) ->
-            val result = report.result()!!
-            all[type] = result
-            if (report.isSuccess()) {
-                definitions[type] = result
-            } else {
-                failures[type] = report
+        val all: MutableMap<TypeIdentifier, MutableMap<Scope, CollectionResult<T>>> = HashMap(reports.size)
+        val definitions: MutableMap<TypeIdentifier, MutableMap<Scope, CollectionResult<T>>> = HashMap(reports.size)
+        val failures: MutableMap<TypeIdentifier, MutableMap<Scope, Report<T>>> = LinkedHashMap()
+        reports.forEach { (type, reportByScope) ->
+            all[type] = LinkedHashMap()
+            val definitionsByScope = LinkedHashMap<Scope, CollectionResult<T>>()
+            val failuresByScope = LinkedHashMap<Scope, Report<T>>()
+            reportByScope.forEach { (scope, report) ->
+                val result = report.result()!!
+                all[type]!![scope] = result
+                if (report.isSuccess()) {
+                    definitionsByScope[scope] = result
+                } else {
+                    failuresByScope[scope] = report
+                }
+            }
+            if (definitionsByScope.isNotEmpty()) {
+                definitions[type] = definitionsByScope
+            }
+            if (failuresByScope.isNotEmpty()) {
+                failures[type] = failuresByScope
             }
         }
         if (failures.isNotEmpty()) {

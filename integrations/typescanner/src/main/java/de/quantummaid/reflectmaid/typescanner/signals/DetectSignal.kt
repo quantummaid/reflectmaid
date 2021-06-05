@@ -20,7 +20,6 @@
  */
 package de.quantummaid.reflectmaid.typescanner.signals
 
-import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.states.Detector
 import de.quantummaid.reflectmaid.typescanner.states.RequirementsDescriber
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
@@ -30,13 +29,18 @@ data class DetectSignal<T>(
     private val requirementsDescriber: RequirementsDescriber
 ) : Signal<T> {
 
+    companion object {
+        @JvmStatic
+        fun <T> detectSignal(detector: Detector<T>, requirementsDescriber: RequirementsDescriber): DetectSignal<T> {
+            return DetectSignal(detector, requirementsDescriber)
+        }
+    }
+
     override fun handleState(definition: StatefulDefinition<T>): StatefulDefinition<T> {
         return definition.detect(detector, requirementsDescriber)
     }
 
-    override fun target(): TypeIdentifier? {
-        return null
-    }
+    override fun target() = null
 
     override fun description(): String {
         return "detect"

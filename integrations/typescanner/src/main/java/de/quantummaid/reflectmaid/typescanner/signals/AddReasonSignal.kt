@@ -23,23 +23,47 @@ package de.quantummaid.reflectmaid.typescanner.signals
 import de.quantummaid.reflectmaid.typescanner.Reason
 import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementName
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope.Companion.rootScope
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
 
 data class AddReasonSignal<T>(
-    private val target: TypeIdentifier,
+    private val target: SignalTarget,
     private val requirement: RequirementName,
     private val reason: Reason
 ) : Signal<T> {
+
+    companion object {
+        @JvmStatic
+        fun <T> addReasonSignal(
+            targetType: TypeIdentifier,
+            requirement: RequirementName,
+            reason: Reason
+        ): AddReasonSignal<T> {
+            return addReasonSignal(targetType, rootScope(), requirement, reason)
+        }
+
+        @JvmStatic
+        fun <T> addReasonSignal(
+            targetType: TypeIdentifier,
+            targetScope: Scope,
+            requirement: RequirementName,
+            reason: Reason
+        ): AddReasonSignal<T> {
+            val target = SignalTarget(targetType, targetScope)
+            return AddReasonSignal(target, requirement, reason)
+        }
+    }
 
     override fun handleState(definition: StatefulDefinition<T>): StatefulDefinition<T> {
         return definition.changeRequirements { it.addReason(requirement, reason) }
     }
 
-    override fun target(): TypeIdentifier {
+    override fun target(): SignalTarget {
         return target
     }
 
     override fun description(): String {
-        return "add ${requirement.value()} to ${target.simpleDescription()}"
+        return "add ${requirement.value()} to ${target.description()}"
     }
 }

@@ -21,10 +21,18 @@
 package de.quantummaid.reflectmaid.typescanner.signals
 
 import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
+
+data class SignalTarget(val typeIdentifier: TypeIdentifier, val scope: Scope) {
+
+    fun description(): String {
+        return "${typeIdentifier.simpleDescription()} in ${scope.render()}"
+    }
+}
 
 interface Signal<T> {
     fun handleState(definition: StatefulDefinition<T>): StatefulDefinition<T>
-    fun target(): TypeIdentifier?
+    fun target(): SignalTarget?
     fun description(): String
 }

@@ -21,12 +21,13 @@
 package de.quantummaid.reflectmaid.typescanner
 
 import de.quantummaid.reflectmaid.typescanner.log.StateLog
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 
 interface OnCollectionError<T> {
 
     fun onCollectionError(
-        results: Map<TypeIdentifier, CollectionResult<T>>,
+        results: Map<TypeIdentifier, Map<Scope, CollectionResult<T>>>,
         log: StateLog<T>,
-        failures: Map<TypeIdentifier, Report<T>>
+        failures: Map<TypeIdentifier, Map<Scope, Report<T>>>
     )
 }

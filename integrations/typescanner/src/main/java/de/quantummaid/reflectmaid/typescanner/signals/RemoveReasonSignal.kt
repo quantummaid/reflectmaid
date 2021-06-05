@@ -21,26 +21,24 @@
 package de.quantummaid.reflectmaid.typescanner.signals
 
 import de.quantummaid.reflectmaid.typescanner.Reason
-import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
 
 data class RemoveReasonSignal<T>(private val reason: Reason) : Signal<T> {
+
+    companion object {
+        @JvmStatic
+        fun <T> removeReasonSignal(reason: Reason): Signal<T> {
+            return RemoveReasonSignal(reason)
+        }
+    }
 
     override fun handleState(definition: StatefulDefinition<T>): StatefulDefinition<T> {
         return definition.changeRequirements { it.removeReason(reason) }
     }
 
-    override fun target(): TypeIdentifier? {
-        return null
-    }
+    override fun target() = null
 
     override fun description(): String {
         return "remove requirements resulting from '${reason.reason()}'"
-    }
-
-    companion object {
-        fun <T> removeReasonSignal(reason: Reason): Signal<T> {
-            return RemoveReasonSignal(reason)
-        }
     }
 }

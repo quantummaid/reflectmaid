@@ -25,6 +25,7 @@ import de.quantummaid.reflectmaid.typescanner.log.LoggedState
 import de.quantummaid.reflectmaid.typescanner.log.StateLogBuilder
 import de.quantummaid.reflectmaid.typescanner.requirements.DetectionRequirements.Companion.empty
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementName
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 import de.quantummaid.reflectmaid.typescanner.states.RequirementsDescriber
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
@@ -36,14 +37,6 @@ class States<T>(
     private val primaryRequirements: List<RequirementName>,
     private val secondaryRequirements: List<RequirementName>
 ) {
-    fun addState(statefulDefinition: StatefulDefinition<T>): States<T> {
-        require(!contains(statefulDefinition.type(), states)) {
-            "state for type '${statefulDefinition.type().description()}' is already registered"
-        }
-        val newStates: MutableList<StatefulDefinition<T>> = ArrayList(states)
-        newStates.add(statefulDefinition)
-        return States(stateFactories, newStates, primaryRequirements, secondaryRequirements)
-    }
 
     fun apply(signal: Signal<T>, processor: Processor<T>, stateLog: StateLogBuilder<T>): States<T> {
         val newStates = apply(signal, processor)
@@ -66,30 +59,31 @@ class States<T>(
             val newStates: MutableList<StatefulDefinition<T>> = ArrayList(
                 states
             )
-            if (!contains(target, newStates)) {
+            if (!contains(target.typeIdentifier, target.scope, newStates)) {
                 val detectionRequirements = empty(primaryRequirements, secondaryRequirements)
-                val context = Context<T>(target, detectionRequirements) { processor.dispatch(it) }
-                val state = stateFactories.createState(target, context)
+                val context = Context<T>(target.typeIdentifier, target.scope, detectionRequirements) { processor.dispatch(it) }
+                val state = stateFactories.createState(target.typeIdentifier, context)
                 newStates.add(state)
             }
-            newStates.replaceAll { statefulDefinition: StatefulDefinition<T> ->
-                if (statefulDefinition.context.type() == target) {
-                    return@replaceAll signal.handleState(statefulDefinition)
+            newStates.replaceAll {
+                if (it.matches(target.typeIdentifier, target.scope)) {
+                    return@replaceAll signal.handleState(it)
                 } else {
-                    return@replaceAll statefulDefinition
+                    return@replaceAll it
                 }
             }
             States(stateFactories, newStates, primaryRequirements, secondaryRequirements)
         }
     }
 
-    fun collect(requirementsDescriber: RequirementsDescriber): Map<TypeIdentifier, Report<T>> {
-        val reports: MutableMap<TypeIdentifier, Report<T>> = HashMap()
-        states.forEach{
+    fun collect(requirementsDescriber: RequirementsDescriber): Map<TypeIdentifier, Map<Scope, Report<T>>> {
+        val reports: MutableMap<TypeIdentifier, MutableMap<Scope, Report<T>>> = HashMap()
+        states.forEach {
             val report = it.getDefinition(requirementsDescriber)
             if (!report.isEmpty()) {
-                val type = it.context.type()
-                reports[type] = report
+                val type = it.context.type
+                val reportByScope = reports.computeIfAbsent(type) { LinkedHashMap() }
+                reportByScope[it.scope()] = report
             }
         }
         return reports
@@ -97,21 +91,19 @@ class States<T>(
 
     private fun contains(
         type: TypeIdentifier,
-        states: List<StatefulDefinition<T>>
+        scope: Scope,
+        states: List<StatefulDefinition<T>>,
     ): Boolean {
-        return states.stream()
-            .anyMatch { statefulDefinition: StatefulDefinition<T> -> statefulDefinition.context.type() == type }
+        return states.any { it.matches(type, scope) }
     }
 
     private fun dumpForLogging(): List<LoggedState> {
-        return states.stream()
-            .map { statefulDefinition: StatefulDefinition<T> ->
-                val type = statefulDefinition.type()
-                val detectionRequirements = statefulDefinition.context
-                    .detectionRequirements()
-                LoggedState(type, statefulDefinition.javaClass, detectionRequirements)
-            }
-            .collect(Collectors.toList())
+        return states.map {
+            val type = it.type()
+            val detectionRequirements = it.context
+                .detectionRequirements()
+            LoggedState(type, it.javaClass, detectionRequirements)
+        }
     }
 
     companion object {

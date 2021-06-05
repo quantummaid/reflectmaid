@@ -22,26 +22,23 @@ package de.quantummaid.reflectmaid.typescanner
 
 import de.quantummaid.reflectmaid.typescanner.requirements.DetectionRequirements
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementsReducer
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 import de.quantummaid.reflectmaid.typescanner.states.DetectionResult
 import de.quantummaid.reflectmaid.typescanner.states.RequiredAction
-import java.util.function.Consumer
 
 fun interface Dispatcher<T> {
     fun dispatch(signal: Signal<T>)
 }
 
 class Context<T>(
-    private val type: TypeIdentifier,
+    val type: TypeIdentifier,
+    val scope: Scope,
     private var detectionRequirements: DetectionRequirements,
     private val dispatcher: Dispatcher<T>
 ) {
     private var manuallyConfiguredResult: T? = null
     private var detectionResult: DetectionResult<T>? = null
-
-    fun type(): TypeIdentifier {
-        return type
-    }
 
     fun dispatch(signal: Signal<T>) {
         dispatcher.dispatch(signal)

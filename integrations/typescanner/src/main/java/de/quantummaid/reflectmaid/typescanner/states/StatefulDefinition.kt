@@ -25,6 +25,7 @@ import de.quantummaid.reflectmaid.typescanner.Report
 import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.requirements.DetectionRequirements
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementsReducer
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 
 fun interface Resolver<T> {
@@ -44,7 +45,11 @@ abstract class StatefulDefinition<T>(val context: Context<T>) {
     abstract fun changeRequirements(reducer: RequirementsReducer): StatefulDefinition<T>
 
     fun type(): TypeIdentifier {
-        return context.type()
+        return context.type
+    }
+
+    fun scope(): Scope {
+        return context.scope
     }
 
     open fun detect(detector: Detector<T>, requirementsDescriber: RequirementsDescriber): StatefulDefinition<T> {
@@ -57,6 +62,13 @@ abstract class StatefulDefinition<T>(val context: Context<T>) {
 
     open fun getDefinition(requirementsDescriber: RequirementsDescriber): Report<T> {
         throw UnsupportedOperationException(this.javaClass.toString() + " " + context.toString())
+    }
+
+    open fun matches(otherType: TypeIdentifier, otherScope: Scope): Boolean {
+        if (context.type != otherType) {
+            return false
+        }
+        return context.scope.contains(otherScope)
     }
 
     override fun equals(other: Any?): Boolean {
