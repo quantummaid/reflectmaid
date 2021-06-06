@@ -29,7 +29,10 @@ import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 
 fun interface Resolver<T> {
-    fun resolve(result: T, type: TypeIdentifier, detectionRequirements: DetectionRequirements): List<Signal<T>>
+    fun resolve(result: T,
+                type: TypeIdentifier,
+                scope: Scope,
+                detectionRequirements: DetectionRequirements): List<Signal<T>>
 }
 
 interface RequirementsDescriber {
@@ -37,7 +40,7 @@ interface RequirementsDescriber {
 }
 
 interface Detector<T> {
-    fun detect(type: TypeIdentifier, detectionRequirements: DetectionRequirements): DetectionResult<T>
+    fun detect(type: TypeIdentifier, scope: Scope, detectionRequirements: DetectionRequirements): DetectionResult<T>
 }
 
 abstract class StatefulDefinition<T>(val context: Context<T>) {

@@ -38,7 +38,7 @@ class Resolving<T> constructor(context: Context<T>) : StatefulDefinition<T>(cont
     override fun resolve(resolver: Resolver<T>): StatefulDefinition<T> {
         val detectionResult = context.detectionResult()
         val result = detectionResult!!.result()
-        val signals = resolver.resolve(result, type(), context.detectionRequirements())
+        val signals = resolver.resolve(result, type(), scope(), context.detectionRequirements())
         signals.forEach { context.dispatch(it) }
         return Resolved(context)
     }
