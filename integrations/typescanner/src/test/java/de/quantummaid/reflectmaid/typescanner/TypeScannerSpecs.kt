@@ -3,7 +3,6 @@ package de.quantummaid.reflectmaid.typescanner
 import de.quantummaid.reflectmaid.typescanner.Processor.Companion.processor
 import de.quantummaid.reflectmaid.typescanner.Reason.Companion.becauseOf
 import de.quantummaid.reflectmaid.typescanner.Reason.Companion.manuallyAdded
-import de.quantummaid.reflectmaid.typescanner.Reason.Companion.reason
 import de.quantummaid.reflectmaid.typescanner.TypeIdentifier.Companion.uniqueVirtualTypeIdentifier
 import de.quantummaid.reflectmaid.typescanner.factories.StateFactory
 import de.quantummaid.reflectmaid.typescanner.log.StateLog
@@ -11,7 +10,6 @@ import de.quantummaid.reflectmaid.typescanner.requirements.DetectionRequirements
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementName
 import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.scopes.Scope.Companion.rootScope
-import de.quantummaid.reflectmaid.typescanner.signals.AddReasonSignal
 import de.quantummaid.reflectmaid.typescanner.signals.AddReasonSignal.Companion.addReasonSignal
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 import de.quantummaid.reflectmaid.typescanner.states.*
