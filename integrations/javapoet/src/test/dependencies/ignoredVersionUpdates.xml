@@ -9,7 +9,7 @@
     <rules>
         <rule groupId="org.jetbrains.kotlin" comparisonMethod="maven">
             <ignoreVersions>
-                <ignoreVersion>1.5.0</ignoreVersion>
+                <ignoreVersion type="regex">1\.5\..*</ignoreVersion>
             </ignoreVersions>
         </rule>
     </rules>
