@@ -17,6 +17,9 @@
         <spotbugs.excludeFilterFile>
             ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
         </spotbugs.excludeFilterFile>
+        <sonar.coverage.exclusions>
+            **/typescanner/**/*,
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
