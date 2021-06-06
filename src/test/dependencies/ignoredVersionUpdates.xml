@@ -12,5 +12,11 @@
                 <ignoreVersion type="regex">1\.5\..*</ignoreVersion>
             </ignoreVersions>
         </rule>
+        <rule groupId="com.mycila" comparisonMethod="maven">
+            <ignoreVersions>
+                <ignoreVersion>4.0</ignoreVersion>
+                <ignoreVersion>4.1</ignoreVersion>
+            </ignoreVersions>
+        </rule>
     </rules>
 </ruleset>

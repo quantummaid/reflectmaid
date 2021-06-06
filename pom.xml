@@ -22,7 +22,7 @@
 
     <properties>
         <dependency-update-file-checksum>25406c206c1aa1b1bf5c2a46ccadcfe6</dependency-update-file-checksum>
-        <plugin-update-file-checksum>d25694f9d0674135a9b37b909e84d640</plugin-update-file-checksum>
+        <plugin-update-file-checksum>7b8101b685be30c5d1abef25892b7b45</plugin-update-file-checksum>
         <kotlin.version>1.4.32</kotlin.version>
     </properties>
 
@@ -78,6 +78,51 @@
                         <goals>
                             <goal>testCompile</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.0.rc2</version>
+                <configuration>
+                    <header>copyright/Copyright-Header.txt</header>
+                    <properties>
+                        <license.year>2021</license.year>
+                    </properties>
+                    <includes>
+                        <include>**/*.kt</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.2.3</version>
+                <configuration>
+                    <includeTests>true</includeTests>
+                    <trace>true</trace>
+                    <effort>Max</effort>
+                    <threshold>low</threshold>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotbugs</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
