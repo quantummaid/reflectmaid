@@ -16,15 +16,28 @@
     <name>ReflectMaid</name>
 
     <modules>
+        <module>bom</module>
         <module>core</module>
         <module>integrations</module>
     </modules>
 
     <properties>
-        <dependency-update-file-checksum>25406c206c1aa1b1bf5c2a46ccadcfe6</dependency-update-file-checksum>
+        <dependency-update-file-checksum>8f6ea182969b0fcce9fae1bb13579713</dependency-update-file-checksum>
         <plugin-update-file-checksum>7b8101b685be30c5d1abef25892b7b45</plugin-update-file-checksum>
         <kotlin.version>1.4.32</kotlin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>de.quantummaid.reflectmaid</groupId>
+                <artifactId>reflectmaid-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
