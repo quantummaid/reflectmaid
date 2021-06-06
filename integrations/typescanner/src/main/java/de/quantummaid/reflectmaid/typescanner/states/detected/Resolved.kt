@@ -47,7 +47,7 @@ class Resolved<T>(context: Context<T>) : StatefulDefinition<T>(context) {
     }
 
     private fun removeTransitiveReasons() {
-        val transitiveReason = becauseOf(context.type)
+        val transitiveReason = becauseOf(context.type, context.scope)
         context.dispatch(RemoveReasonSignal(transitiveReason))
     }
 

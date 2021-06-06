@@ -39,6 +39,6 @@ data class RemoveReasonSignal<T>(private val reason: Reason) : Signal<T> {
     override fun target() = null
 
     override fun description(): String {
-        return "remove requirements resulting from '${reason.reason()}'"
+        return "remove requirements resulting from '${reason.reason}'"
     }
 }

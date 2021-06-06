@@ -20,12 +20,13 @@
  */
 package de.quantummaid.reflectmaid.typescanner
 
-data class Reason(
-    private val reason: String,
-    private val parent: TypeIdentifier?
-) {
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
+import de.quantummaid.reflectmaid.typescanner.signals.SignalTarget
 
-    fun reason() = reason
+data class Reason(
+    val reason: String,
+    val parent: SignalTarget?
+) {
 
     fun render(subReasonProvider: SubReasonProvider): List<String> {
         return renderRecursive(subReasonProvider, ArrayList())
@@ -38,7 +39,7 @@ data class Reason(
         if (parent == null) {
             return listOf(reason)
         }
-        val parentName = parent.description()
+        val parentName = parent.typeIdentifier.description()
         if (alreadyVisitedReasons.contains(this)) {
             return listOf("$parentName...")
         }
@@ -56,8 +57,8 @@ data class Reason(
         }
 
         @JvmStatic
-        fun becauseOf(parent: TypeIdentifier): Reason {
-            return Reason("because of ${parent.description()}", parent)
+        fun becauseOf(parent: TypeIdentifier, scope: Scope): Reason {
+            return Reason("because of ${parent.description()}", SignalTarget(parent, scope))
         }
 
         @JvmStatic
@@ -68,5 +69,5 @@ data class Reason(
 }
 
 fun interface SubReasonProvider {
-    fun reasonsFor(typeIdentifier: TypeIdentifier): List<Reason>
+    fun reasonsFor(target: SignalTarget): List<Reason>
 }

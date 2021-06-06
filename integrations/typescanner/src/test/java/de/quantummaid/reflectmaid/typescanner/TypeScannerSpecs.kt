@@ -69,7 +69,7 @@ class MyResolver : Resolver<MyDefinition> {
         scope: Scope,
         detectionRequirements: DetectionRequirements
     ): List<Signal<MyDefinition>> {
-        return result.dependencies.map { addReasonSignal(it, scope, REGISTERED, becauseOf(type)) }
+        return result.dependencies.map { addReasonSignal(it, scope, REGISTERED, becauseOf(type, scope)) }
     }
 }
 
