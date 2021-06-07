@@ -13,9 +13,10 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>typescanner</module>
+        <module>graalvm</module>
         <module>javapoet</module>
         <module>bytecodeexecutor</module>
-        <module>typescanner</module>
     </modules>
 
     <properties>

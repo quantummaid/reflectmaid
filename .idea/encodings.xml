@@ -3,6 +3,7 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/core/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/integrations/bytecodeexecutor/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/integrations/graalvm/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/integrations/javapoet/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/integrations/typescanner/src/main/java" charset="UTF-8" />
   </component>

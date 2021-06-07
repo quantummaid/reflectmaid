@@ -47,6 +47,8 @@ interface ExecutorFactory {
 }
 
 class ReflectionExecutorFactory : ExecutorFactory {
+    private val registeredDynamicProxies = ArrayList<ResolvedType>()
+
     override fun createMethodExecutor(method: ResolvedMethod) = ReflectionMethodExecutor(method)
     override fun createConstructorExecutor(constructor: ResolvedConstructor) =
         ReflectionConstructorExecutor(constructor)
@@ -54,7 +56,12 @@ class ReflectionExecutorFactory : ExecutorFactory {
     override fun createFieldGetter(field: ResolvedField) = ReflectionFieldGetter(field)
     override fun createFieldSetter(field: ResolvedField) = ReflectionFieldSetter(field)
     override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
+        registeredDynamicProxies.add(facadeInterface)
         return createDynamicProxyFactoryUsingInvocationHandler(facadeInterface)
+    }
+
+    fun registeredDynamicProxies(): List<ResolvedType> {
+        return registeredDynamicProxies
     }
 }
 
