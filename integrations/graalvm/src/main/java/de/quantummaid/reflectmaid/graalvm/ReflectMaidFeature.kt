@@ -33,7 +33,6 @@ import org.graalvm.nativeimage.impl.RuntimeReflectionSupport
 class ReflectMaidFeature : Feature {
     private var registered = false
 
-
     override fun duringAnalysis(access: Feature.DuringAnalysisAccess) {
         if (registered) {
             return
