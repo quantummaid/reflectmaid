@@ -22,28 +22,67 @@ package de.quantummaid.reflectmaid.typescanner.factories
 
 import de.quantummaid.reflectmaid.typescanner.Context
 import de.quantummaid.reflectmaid.typescanner.TypeIdentifier
+import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.states.StatefulDefinition
 import de.quantummaid.reflectmaid.typescanner.states.detected.Unreasoned
 
-fun interface StateFactory<T> {
-    fun create(type: TypeIdentifier, context: Context<T>): StatefulDefinition<T>?
+interface StateFactory<T> {
+    fun applies(type: TypeIdentifier): Boolean
+
+    fun create(type: TypeIdentifier, context: Context<T>)
 }
 
 class UndetectedFactory<T> : StateFactory<T> {
-    override fun create(type: TypeIdentifier, context: Context<T>): StatefulDefinition<T> {
-        return Unreasoned(context)
+
+    override fun applies(type: TypeIdentifier) = true
+
+    override fun create(type: TypeIdentifier, context: Context<T>) {
+        // do nothing
     }
 }
 
-class StateFactories<T>(private val stateFactories: List<StateFactory<T>>) {
+class StateFactories<T>(
+    private val stateFactories: Map<Scope, List<StateFactory<T>>>,
+    private val defaultFactory: StateFactory<T>
+) {
 
-    fun createState(type: TypeIdentifier, context: Context<T>): StatefulDefinition<T> {
-        for (stateFactory in stateFactories) {
-            val statefulDefinition = stateFactory.create(type, context)
-            if (statefulDefinition != null) {
-                return statefulDefinition
+    fun createBetterState(
+        type: TypeIdentifier,
+        scope: Scope,
+        currentScope: Scope,
+        contextProvider: (Scope) -> Context<T>
+    ): StatefulDefinition<T>? {
+        val relevantScopes = stateFactories.keys
+            .filter { it.contains(scope) }
+            .filter { it.size() > currentScope.size() }
+            .sortedByDescending { it.size() }
+        relevantScopes.forEach { actualScope ->
+            val factory = stateFactories[actualScope]!!.firstOrNull { it.applies(type) }
+            if (factory != null) {
+                return createState(factory, actualScope, contextProvider)
             }
         }
-        throw UnsupportedOperationException("This should never happen")
+        return null
+    }
+
+    fun createState(type: TypeIdentifier, scope: Scope, contextProvider: (Scope) -> Context<T>): StatefulDefinition<T> {
+        val relevantScopes = stateFactories.keys
+            .filter { it.contains(scope) }
+            .sortedByDescending { it.size() }
+        relevantScopes.forEach { actualScope ->
+            val factory = stateFactories[actualScope]!!.firstOrNull { it.applies(type) }
+            if (factory != null) {
+                return createState(factory, actualScope, contextProvider)
+            }
+        }
+        return createState(defaultFactory, scope, contextProvider)
+    }
+
+    private fun createState(stateFactory: StateFactory<T>,
+                            actualScope: Scope,
+                            contextProvider: (Scope) -> Context<T>): StatefulDefinition<T> {
+        val context = contextProvider.invoke(actualScope)
+        stateFactory.create(context.type, context)
+        return Unreasoned(context)
     }
 }

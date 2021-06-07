@@ -21,7 +21,6 @@
 package de.quantummaid.reflectmaid.typescanner
 
 import de.quantummaid.reflectmaid.typescanner.factories.StateFactories
-import de.quantummaid.reflectmaid.typescanner.factories.StateFactory
 import de.quantummaid.reflectmaid.typescanner.log.StateLog
 import de.quantummaid.reflectmaid.typescanner.log.StateLogBuilder
 import de.quantummaid.reflectmaid.typescanner.requirements.RequirementName
@@ -104,14 +103,14 @@ class Processor<T>(
     companion object {
         @JvmStatic
         fun <T> processor(
-            stateFactories: List<StateFactory<T>>,
+            stateFactories: StateFactories<T>,
             primaryRequirements: List<RequirementName>,
             secondaryRequirements: List<RequirementName>
         ): Processor<T> {
             val pendingSignals: Queue<Signal<T>> = LinkedList()
             val states = States.states(
                 ArrayList(),
-                StateFactories(stateFactories),
+                stateFactories,
                 primaryRequirements,
                 secondaryRequirements
             )

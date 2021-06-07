@@ -60,6 +60,12 @@ data class Scope(private val scope: List<TypeIdentifier>) {
         return true
     }
 
+    fun nearestParent(scopes: List<Scope>): Scope? {
+        return scopes
+            .filter { it.scope.contains(this) }
+            .maxByOrNull { it.size() }
+    }
+
     companion object {
         @JvmStatic
         fun rootScope(): Scope {
