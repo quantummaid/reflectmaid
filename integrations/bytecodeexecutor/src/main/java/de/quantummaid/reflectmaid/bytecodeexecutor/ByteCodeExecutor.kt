@@ -22,7 +22,6 @@ package de.quantummaid.reflectmaid.bytecodeexecutor
 
 import com.squareup.javapoet.*
 import de.quantummaid.reflectmaid.*
-import de.quantummaid.reflectmaid.bytecodeexecutor.FieldsAndConstructor.Companion.createFieldsAndConstructor
 import de.quantummaid.reflectmaid.bytecodeexecutor.FieldsAndConstructor.Companion.empty
 import de.quantummaid.reflectmaid.bytecodeexecutor.compilation.InMemoryCompiler
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
@@ -31,6 +30,7 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter
 import de.reflectmaid.quantummaid.javapoet.toTypeName
+import javax.lang.model.element.Modifier
 import javax.lang.model.element.Modifier.*
 import kotlin.reflect.KClass
 
@@ -101,44 +101,48 @@ class ByteCodeExecutorFactory(private val generator: Generator) : ExecutorFactor
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T> createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T {
-        val proxyHandlerName = "proxyHandler"
+    override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
+        return ProxyFactory { handler ->
+            val proxyHandlerName = "proxyHandler"
 
-        val methods = facadeInterface.methods()
-        val methodFields = methods.map { Field(it.name() + "Method", TypeName.get(ResolvedMethod::class.java)) }
-        val fieldsAndConstructor = createFieldsAndConstructor(
-            listOf(
-                Field(proxyHandlerName, TypeName.get(ProxyHandler::class.java))
-            ) + methodFields
-        )
+            val methods = facadeInterface.methods()
+            val methodFields = methods.map { Field(it.name() + "Method", TypeName.get(ResolvedMethod::class.java)) }
+            val fieldsAndConstructor = FieldsAndConstructor.createFieldsAndConstructor(
+                listOf(
+                    Field(proxyHandlerName, TypeName.get(ProxyHandler::class.java))
+                ) + methodFields
+            )
 
-        val methodSpecs = methods.map { method ->
-            val methodSpec = overrideMethod(method.name())
-            val returnType = method.returnType
-            val returnTypeName = returnType?.toTypeName() ?: TypeName.VOID
-            methodSpec.returns(returnTypeName)
-            val listType = ParameterizedTypeName.get(List::class.java, Any::class.java)
+            val methodSpecs = methods.map { method ->
+                val methodSpec = overrideMethod(method.name())
+                val returnType = method.returnType
+                val returnTypeName = returnType?.toTypeName() ?: TypeName.VOID
+                methodSpec.returns(returnTypeName)
+                val listType = ParameterizedTypeName.get(List::class.java, Any::class.java)
 
-            method.parameters.forEach {
-                methodSpec.addParameter(it.type.toTypeName(), it.name(), FINAL)
+                method.parameters.forEach {
+                    methodSpec.addParameter(it.type.toTypeName(), it.name(), Modifier.FINAL)
+                }
+
+                val parametersForList = method.parameters.joinToString { it.name() }
+                methodSpec.addStatement("final \$T list = \$T.of($parametersForList)", listType, List::class.java)
+                methodSpec.addStatement(
+                    "final \$T returnValue = $proxyHandlerName.invoke(${method.name() + "Method"}, list)",
+                    Any::class.java
+                )
+                if (returnType != null) {
+                    methodSpec.addStatement("return (\$T) returnValue", returnType.toTypeName())
+                }
+
+                methodSpec.build()
             }
+            val compiledClass = generator.createClass(facadeInterface.toTypeName(), methodSpecs, fieldsAndConstructor)
 
-            val parametersForList = method.parameters.joinToString { it.name() }
-            methodSpec.addStatement("final \$T list = \$T.of($parametersForList)", listType, List::class.java)
-            methodSpec.addStatement("final \$T returnValue = $proxyHandlerName.invoke(${method.name() + "Method"}, list)", Any::class.java)
-            if (returnType != null) {
-                methodSpec.addStatement("return (\$T) returnValue", returnType.toTypeName())
-            }
-
-            methodSpec.build()
+            val declaredConstructor = compiledClass.getDeclaredConstructor(
+                ProxyHandler::class.java, *methods.map { ResolvedMethod::class.java }.toTypedArray()
+            )
+            declaredConstructor.newInstance(handler, *methods.toTypedArray()) as T
         }
-
-        val compiledClass = generator.createClass(facadeInterface.toTypeName(), methodSpecs, fieldsAndConstructor)
-
-        val declaredConstructor = compiledClass.getDeclaredConstructor(
-            ProxyHandler::class.java, *methods.map { ResolvedMethod::class.java }.toTypedArray()
-        )
-        return declaredConstructor.newInstance(handler, *methods.toTypedArray()) as T
     }
 }
 
@@ -177,7 +181,7 @@ class Generator(private val targetPackage: String) {
     }
 }
 
-private fun overrideMethod(name: String): MethodSpec.Builder {
+fun overrideMethod(name: String): MethodSpec.Builder {
     return MethodSpec.methodBuilder(name)
         .addAnnotation(Override::class.java)
         .addAnnotation(

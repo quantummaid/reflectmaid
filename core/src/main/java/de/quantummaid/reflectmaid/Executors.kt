@@ -43,16 +43,18 @@ interface ExecutorFactory {
     fun createConstructorExecutor(constructor: ResolvedConstructor): Executor
     fun createFieldGetter(field: ResolvedField): Getter
     fun createFieldSetter(field: ResolvedField): Setter
-    fun <T> createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T
+    fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T>
 }
 
 class ReflectionExecutorFactory : ExecutorFactory {
     override fun createMethodExecutor(method: ResolvedMethod) = ReflectionMethodExecutor(method)
-    override fun createConstructorExecutor(constructor: ResolvedConstructor) = ReflectionConstructorExecutor(constructor)
+    override fun createConstructorExecutor(constructor: ResolvedConstructor) =
+        ReflectionConstructorExecutor(constructor)
+
     override fun createFieldGetter(field: ResolvedField) = ReflectionFieldGetter(field)
     override fun createFieldSetter(field: ResolvedField) = ReflectionFieldSetter(field)
-    override fun <T> createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T {
-        return createDynamicProxyUsingInvocationHandler(facadeInterface, handler)
+    override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
+        return createDynamicProxyFactoryUsingInvocationHandler(facadeInterface)
     }
 }
 
@@ -62,7 +64,10 @@ class ReflectionMethodExecutor(private val method: ResolvedMethod) : Executor {
         try {
             return method.method.invoke(instance, *parameters.toTypedArray())
         } catch (e: InvocationTargetException) {
-            throw handleInvocationTargetException(e, "calling method ${method.describe()} in ${method.declaringType.description()}")
+            throw handleInvocationTargetException(
+                e,
+                "calling method ${method.describe()} in ${method.declaringType.description()}"
+            )
         }
     }
 }
@@ -73,7 +78,10 @@ class ReflectionConstructorExecutor(private val constructor: ResolvedConstructor
         try {
             return constructor.constructor.newInstance(*parameters.toTypedArray())
         } catch (e: InvocationTargetException) {
-            throw handleInvocationTargetException(e, "calling constructor ${constructor.describe()} in ${constructor.declaringType.description()}")
+            throw handleInvocationTargetException(
+                e,
+                "calling constructor ${constructor.describe()} in ${constructor.declaringType.description()}"
+            )
         }
     }
 }
@@ -90,7 +98,10 @@ class ReflectionFieldSetter(private val field: ResolvedField) : Setter {
     }
 }
 
-private fun handleInvocationTargetException(exception: InvocationTargetException, description: String): java.lang.Exception {
+private fun handleInvocationTargetException(
+    exception: InvocationTargetException,
+    description: String
+): java.lang.Exception {
     val targetException = exception.targetException
     if (targetException is java.lang.Exception) {
         return targetException
