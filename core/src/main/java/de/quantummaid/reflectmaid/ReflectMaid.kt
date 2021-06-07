@@ -27,10 +27,13 @@ import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.WildcardedType
+import de.quantummaid.reflectmaid.resolvedtype.resolver.RawTypeCache
+import de.quantummaid.reflectmaid.resolvedtype.resolver.RawTypeCaches
 import java.util.stream.Collectors
 import kotlin.reflect.KClass
 
 class ReflectMaid(private val cache: ReflectionCache,
+                  val rawTypeCaches: RawTypeCaches,
                   val executorFactory: ExecutorFactory) {
 
     fun resolve(type: Class<*>): ResolvedType {
@@ -130,12 +133,12 @@ class ReflectMaid(private val cache: ReflectionCache,
         @JvmStatic
         fun aReflectMaid(): ReflectMaid {
             val executorFactory = ReflectionExecutorFactory()
-            return ReflectMaid(ReflectionCache(), executorFactory)
+            return aReflectMaid(executorFactory)
         }
 
         @JvmStatic
         fun aReflectMaid(executorFactory: ExecutorFactory): ReflectMaid {
-            return ReflectMaid(ReflectionCache(), executorFactory)
+            return ReflectMaid(ReflectionCache(), RawTypeCaches(), executorFactory)
         }
     }
 }

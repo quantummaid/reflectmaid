@@ -31,11 +31,13 @@ import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.util.*
 
-data class ResolvedField(val name: String,
-                         val type: ResolvedType,
-                         val declaringType: ResolvedType,
-                         val field: Field,
-                         val reflectMaid: ReflectMaid) {
+data class ResolvedField(
+    val name: String,
+    val type: ResolvedType,
+    val declaringType: ResolvedType,
+    val field: Field,
+    val reflectMaid: ReflectMaid
+) {
     private val getter: Cached<Getter> = Cached { reflectMaid.executorFactory.createFieldGetter(this) }
     private val setter: Cached<Setter> = Cached { reflectMaid.executorFactory.createFieldSetter(this) }
 
@@ -89,15 +91,18 @@ data class ResolvedField(val name: String,
     fun createSetter() = setter.get()
 
     companion object {
-        fun resolvedFields(reflectMaid: ReflectMaid,
-                           fullType: ClassType): List<ResolvedField> {
+        fun resolvedFields(
+            reflectMaid: ReflectMaid,
+            fullType: ClassType
+        ): List<ResolvedField> {
             val type = fullType.assignableType()
-            return type.declaredFields
-                    .filter { !it.isSynthetic }
-                    .map {
-                        val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))
-                        ResolvedField(it.name, resolved, fullType, it, reflectMaid)
-                    }
+            val fieldCache = reflectMaid.rawTypeCaches.fieldCache
+            return fieldCache.get(type) { it.declaredFields }
+                .filter { !it.isSynthetic }
+                .map {
+                    val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))
+                    ResolvedField(it.name, resolved, fullType, it, reflectMaid)
+                }
         }
     }
 }
