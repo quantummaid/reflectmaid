@@ -37,6 +37,9 @@
         <plugin-update-file-checksum>915baffd77985e9da0d3cfee67e149eb</plugin-update-file-checksum>
         <junit.version>5.7.2</junit.version>
         <maven-surfire-plugin-version>3.0.0-M5</maven-surfire-plugin-version>
+        <sonar.coverage.exclusions>
+            **/graalvmtestimage/**/*,
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
