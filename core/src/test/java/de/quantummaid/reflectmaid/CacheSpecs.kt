@@ -24,10 +24,10 @@ import de.quantummaid.reflectmaid.GenericType.Companion.fromResolvedType
 import de.quantummaid.reflectmaid.GenericType.Companion.genericType
 import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.types.TestType
 import de.quantummaid.reflectmaid.types.TypeWithFields
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsInAnyOrder
-import org.hamcrest.Matchers.hasSize
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -150,6 +150,33 @@ class CacheSpecs {
     @Test
     fun sameResolvedTypeReferenceGetsReturnedForSameWildcardBasedGenericType() {
         assertSameReferenceGetsReturned { wildcard() }
+    }
+
+    @Test
+    fun cachedMethodsCanBeQueried() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val classType = reflectMaid.resolve<TestType>() as ClassType
+        assertThat(classType.cachedMethods().size, `is`(0))
+        classType.methods()
+        assertThat(classType.cachedMethods().size, `is`(1))
+    }
+
+    @Test
+    fun cachedFieldsCanBeQueried() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val classType = reflectMaid.resolve<TestType>() as ClassType
+        assertThat(classType.cachedFields().size, `is`(0))
+        classType.fields()
+        assertThat(classType.cachedFields().size, `is`(1))
+    }
+
+    @Test
+    fun cachedConstructorsCanBeQueried() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val classType = reflectMaid.resolve<TestType>() as ClassType
+        assertThat(classType.cachedConstructors().size, `is`(0))
+        classType.constructors()
+        assertThat(classType.cachedConstructors().size, `is`(1))
     }
 
     private fun assertSameReferenceGetsReturned(genericTypeFactory: () -> GenericType<*>) {

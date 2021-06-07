@@ -37,10 +37,13 @@ import java.lang.reflect.Modifier
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 
-data class ClassType(private val clazz: Class<*>,
-                     private val typeParameters: Map<TypeVariableName, ResolvedType>,
-                     private val reflectMaid: ReflectMaid) : ResolvedType {
-    private var methods: Cached<List<ResolvedMethod>> = Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this, language()) }
+data class ClassType(
+    private val clazz: Class<*>,
+    private val typeParameters: Map<TypeVariableName, ResolvedType>,
+    private val reflectMaid: ReflectMaid
+) : ResolvedType {
+    private var methods: Cached<List<ResolvedMethod>> =
+        Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this, language()) }
     private var constructors: Cached<List<ResolvedConstructor>> = Cached { resolveConstructors(reflectMaid, this) }
     private var fields: Cached<List<ResolvedField>> = Cached { resolvedFields(reflectMaid, this) }
     private var sealedSubclasses: Cached<List<ResolvedType>> = Cached { resolveSealedSubclasses(this, reflectMaid) }
@@ -60,19 +63,31 @@ data class ClassType(private val clazz: Class<*>,
 
     override fun typeParameters(): List<ResolvedType> {
         return TypeVariableName.typeVariableNamesOf(clazz)
-                .map { typeParameters[it]!! }
+            .map { typeParameters[it]!! }
     }
 
     override fun methods(): List<ResolvedMethod> {
         return methods.get()
     }
 
+    fun cachedMethods(): List<ResolvedMethod> {
+        return methods.cached() ?: emptyList()
+    }
+
     override fun constructors(): List<ResolvedConstructor> {
         return constructors.get()
     }
 
+    fun cachedConstructors(): List<ResolvedConstructor> {
+        return constructors.cached() ?: emptyList()
+    }
+
     override fun fields(): List<ResolvedField> {
         return fields.get()
+    }
+
+    fun cachedFields(): List<ResolvedField> {
+        return fields.cached() ?: emptyList()
     }
 
     override fun sealedSubclasses(): List<ResolvedType> {
@@ -88,7 +103,7 @@ data class ClassType(private val clazz: Class<*>,
             return clazz.name
         }
         val parametersString = typeParameters()
-                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description(language) }
+            .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description(language) }
         return clazz.name + parametersString
     }
 
@@ -97,7 +112,7 @@ data class ClassType(private val clazz: Class<*>,
             return clazz.simpleName
         }
         val parametersString = typeParameters()
-                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription(language) }
+            .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription(language) }
         return clazz.simpleName + parametersString
     }
 
@@ -134,8 +149,10 @@ data class ClassType(private val clazz: Class<*>,
 
     companion object {
         @JvmStatic
-        fun fromClassWithoutGenerics(reflectMaid: ReflectMaid,
-                                     type: Class<*>): ClassType {
+        fun fromClassWithoutGenerics(
+            reflectMaid: ReflectMaid,
+            type: Class<*>
+        ): ClassType {
             if (type.isArray) {
                 throw UnsupportedOperationException()
             }
@@ -146,9 +163,11 @@ data class ClassType(private val clazz: Class<*>,
         }
 
         @JvmStatic
-        fun fromClassWithGenerics(reflectMaid: ReflectMaid,
-                                  type: Class<*>,
-                                  typeParameters: Map<TypeVariableName, ResolvedType>): ClassType {
+        fun fromClassWithGenerics(
+            reflectMaid: ReflectMaid,
+            type: Class<*>,
+            typeParameters: Map<TypeVariableName, ResolvedType>
+        ): ClassType {
             if (type.isArray) {
                 throw UnsupportedOperationException()
             }
@@ -165,6 +184,10 @@ class Cached<T>(private val supplier: () -> T) {
             cached = supplier.invoke()
         }
         return cached!!
+    }
+
+    fun cached(): T? {
+        return cached
     }
 
     override fun equals(other: Any?): Boolean {
@@ -195,8 +218,8 @@ private fun resolveSealedSubclasses(classType: ClassType, reflectMaid: ReflectMa
         val kotlinClass = Reflection.createKotlinClass(classType.assignableType())
         @Suppress("UNCHECKED_CAST", "NO_REFLECTION_IN_CLASS_PATH")
         (kotlinClass.sealedSubclasses as List<KClass<Any>>)
-                .map { GenericType.genericType(it) }
-                .map { reflectMaid.resolve(it) }
+            .map { GenericType.genericType(it) }
+            .map { reflectMaid.resolve(it) }
     } else {
         emptyList()
     }

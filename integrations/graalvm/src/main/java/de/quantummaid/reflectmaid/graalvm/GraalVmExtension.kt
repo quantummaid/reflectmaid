@@ -21,12 +21,58 @@
 package de.quantummaid.reflectmaid.graalvm
 
 import de.quantummaid.reflectmaid.ReflectMaid
-import de.quantummaid.reflectmaid.graalvm.ReflectMaidFeature.Companion.addReflectMaid
+import de.quantummaid.reflectmaid.ReflectionExecutorFactory
+import de.quantummaid.reflectmaid.TypeToken
+import de.quantummaid.reflectmaid.resolvedtype.ClassType
 
 fun ReflectMaid.registerToGraalVm(
     registerReflections: Boolean = true,
-    registerDynamicProxies: Boolean = true
+    registerDynamicProxies: Boolean = true,
+    registry: ReflectMaidRegistry = REFLECTMAID_REGISTRY
 ) {
     val registeredReflectMaid = RegisteredReflectMaid(this, registerDynamicProxies, registerReflections)
-    addReflectMaid(registeredReflectMaid)
+    registry.addReflectMaid(registeredReflectMaid)
+}
+
+data class RegisteredReflectMaid(
+    val reflectMaid: ReflectMaid,
+    val registerDynamicProxies: Boolean,
+    val registerReflections: Boolean
+)
+
+val REFLECTMAID_REGISTRY = ReflectMaidRegistry()
+
+class ReflectMaidRegistry {
+    private val reflectMaids = mutableListOf<RegisteredReflectMaid>()
+
+    fun addReflectMaid(registeredReflectMaid: RegisteredReflectMaid) {
+        reflectMaids.add(registeredReflectMaid)
+    }
+
+    fun registerReflections(registerer: (List<ClassType>) -> Unit) {
+        val reflections = reflectMaids
+            .filter { it.registerReflections }
+            .map { it.reflectMaid }
+            .flatMap { it.registeredTypes() }
+            .filterIsInstance<ClassType>()
+            .filter { it.assignableType() != TypeToken::class.java }
+            .distinct()
+        if (reflections.isNotEmpty()) {
+            registerer.invoke(reflections)
+        }
+    }
+
+    fun registerDynamicProxies(registerer: (List<Class<*>>) -> Unit) {
+        val dynamicProxies = reflectMaids
+            .filter { it.registerDynamicProxies }
+            .map { it.reflectMaid }
+            .map { it.executorFactory }
+            .filterIsInstance<ReflectionExecutorFactory>()
+            .flatMap { it.registeredDynamicProxies() }
+            .map { it.assignableType() }
+            .distinct()
+        if (dynamicProxies.isNotEmpty()) {
+            registerer.invoke(dynamicProxies)
+        }
+    }
 }

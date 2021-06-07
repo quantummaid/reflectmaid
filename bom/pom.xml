@@ -50,17 +50,22 @@
             </dependency>
             <dependency>
                 <groupId>de.quantummaid.reflectmaid</groupId>
-                <artifactId>typescanner</artifactId>
+                <artifactId>reflectmaid-graalvm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>de.quantummaid.reflectmaid</groupId>
-                <artifactId>bytecodeexecutor</artifactId>
+                <artifactId>reflectmaid-typescanner</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>de.quantummaid.reflectmaid</groupId>
-                <artifactId>javapoet</artifactId>
+                <artifactId>reflectmaid-bytecodeexecutor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.quantummaid.reflectmaid</groupId>
+                <artifactId>reflectmaid-javapoet</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

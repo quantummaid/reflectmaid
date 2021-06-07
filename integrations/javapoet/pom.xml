@@ -8,7 +8,7 @@
         <version>0.2.12</version>
     </parent>
 
-    <artifactId>javapoet</artifactId>
+    <artifactId>reflectmaid-javapoet</artifactId>
 
     <properties>
         <dependency-update-file-checksum>42f33b16b7099885cd5becc23c104f35</dependency-update-file-checksum>

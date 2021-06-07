@@ -8,7 +8,7 @@
         <version>0.2.12</version>
     </parent>
 
-    <artifactId>bytecodeexecutor</artifactId>
+    <artifactId>reflectmaid-bytecodeexecutor</artifactId>
 
     <properties>
         <spotbugs.excludeFilterFile>
@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>de.quantummaid.reflectmaid</groupId>
-            <artifactId>javapoet</artifactId>
+            <artifactId>reflectmaid-javapoet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

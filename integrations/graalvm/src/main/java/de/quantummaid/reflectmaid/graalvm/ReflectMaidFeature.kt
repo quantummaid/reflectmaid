@@ -22,77 +22,37 @@ package de.quantummaid.reflectmaid.graalvm
 
 import com.oracle.svm.core.annotate.AutomaticFeature
 import com.oracle.svm.core.jdk.proxy.DynamicProxyRegistry
-import de.quantummaid.reflectmaid.ReflectMaid
-import de.quantummaid.reflectmaid.ReflectionExecutorFactory
+import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import org.graalvm.nativeimage.ImageSingletons
 import org.graalvm.nativeimage.hosted.Feature
 import org.graalvm.nativeimage.hosted.RuntimeReflection
 import org.graalvm.nativeimage.impl.RuntimeReflectionSupport
 
-data class RegisteredReflectMaid(
-    val reflectMaid: ReflectMaid,
-    val registerDynamicProxies: Boolean,
-    val registerReflections: Boolean
-)
-
 @AutomaticFeature
 class ReflectMaidFeature : Feature {
 
-    companion object {
-        private val registeredReflectMaids = mutableListOf<RegisteredReflectMaid>()
-
-        @JvmStatic
-        fun addReflectMaid(registeredReflectMaid: RegisteredReflectMaid) {
-            registeredReflectMaids.add(registeredReflectMaid)
-        }
-    }
-
     override fun beforeAnalysis(access: Feature.BeforeAnalysisAccess?) {
-        registerReflections()
-        registerDynamicProxies()
-    }
-
-    override fun afterAnalysis(access: Feature.AfterAnalysisAccess?) {
-    }
-
-    private fun registerReflections() {
-        val reflections = registeredReflectMaids
-            .filter { it.registerReflections }
-            .map { it.reflectMaid }
-            .flatMap { it.registeredTypes() }
-            .distinct()
-        if (reflections.isNotEmpty()) {
+        REFLECTMAID_REGISTRY.registerReflections { reflections ->
             val runtimeReflectionSupport = ImageSingletons.lookup(RuntimeReflectionSupport::class.java)
             reflections.forEach { registerReflections(it, runtimeReflectionSupport) }
         }
-    }
-
-    private fun registerReflections(resolvedType: ResolvedType, runtimeReflectionSupport: RuntimeReflectionSupport) {
-        RuntimeReflection.register(resolvedType.assignableType())
-        resolvedType.methods()
-            .map { it.method }
-            .forEach { runtimeReflectionSupport.register(it) }
-        resolvedType.constructors()
-            .map { it.constructor }
-            .forEach { runtimeReflectionSupport.register(it) }
-        resolvedType.fields()
-            .map { it.field }
-            .forEach { runtimeReflectionSupport.register(false, false, it) }
-    }
-
-    private fun registerDynamicProxies() {
-        val dynamicProxies = registeredReflectMaids
-            .filter { it.registerDynamicProxies }
-            .map { it.reflectMaid }
-            .map { it.executorFactory }
-            .filterIsInstance<ReflectionExecutorFactory>()
-            .flatMap { it.registeredDynamicProxies() }
-            .map { it.assignableType() }
-            .distinct()
-        if (dynamicProxies.isNotEmpty()) {
+        REFLECTMAID_REGISTRY.registerDynamicProxies { dynamicProxies ->
             val dynamicProxyRegistry = ImageSingletons.lookup(DynamicProxyRegistry::class.java)
             dynamicProxies.forEach { dynamicProxyRegistry.addProxyClass(it) }
         }
+    }
+
+    private fun registerReflections(type: ClassType, runtimeReflectionSupport: RuntimeReflectionSupport) {
+        RuntimeReflection.register(type.assignableType())
+        type.cachedMethods()
+            .map { it.method }
+            .forEach { runtimeReflectionSupport.register(it) }
+        type.cachedConstructors()
+            .map { it.constructor }
+            .forEach { runtimeReflectionSupport.register(it) }
+        type.cachedFields()
+            .map { it.field }
+            .forEach { runtimeReflectionSupport.register(false, false, it) }
     }
 }
