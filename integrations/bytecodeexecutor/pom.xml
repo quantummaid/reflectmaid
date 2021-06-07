@@ -5,10 +5,10 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>0.2.12</version>
+        <version>0.2.13</version>
     </parent>
 
-    <artifactId>bytecodeexecutor</artifactId>
+    <artifactId>reflectmaid-bytecodeexecutor</artifactId>
 
     <properties>
         <spotbugs.excludeFilterFile>
@@ -45,7 +45,7 @@
         </dependency>
         <dependency>
             <groupId>de.quantummaid.reflectmaid</groupId>
-            <artifactId>javapoet</artifactId>
+            <artifactId>reflectmaid-javapoet</artifactId>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

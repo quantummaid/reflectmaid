@@ -5,17 +5,18 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>reflectmaid-parent</artifactId>
-        <version>0.2.12</version>
+        <version>0.2.13</version>
     </parent>
 
     <artifactId>integrations-parent</artifactId>
-    <version>0.2.12</version>
+    <version>0.2.13</version>
     <packaging>pom</packaging>
 
     <modules>
+        <module>typescanner</module>
+        <module>graalvm</module>
         <module>javapoet</module>
         <module>bytecodeexecutor</module>
-        <module>typescanner</module>
     </modules>
 
     <properties>

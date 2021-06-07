@@ -20,9 +20,9 @@
  */
 package de.quantummaid.reflectmaid.bytecodeexecutor
 
-import de.quantummaid.reflectmaid.ReflectMaid
+import de.quantummaid.reflectmaid.ReflectMaid.Companion.aReflectMaid
 import de.quantummaid.reflectmaid.bytecodeexecutor.ByteCodeExecutorFactory.Companion.byteCodeExecutorFactory
-import de.quantummaid.reflectmaid.createDynamicProxy
+import de.quantummaid.reflectmaid.createDynamicProxyFactory
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
@@ -49,8 +49,9 @@ class ByteCodeDynamicProxySpecs {
 
     @Test
     fun dynamicProxyCanBeCreated() {
-        val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
-        val proxy = reflectMaid.createDynamicProxy<MyInterface> { _, parameters ->
+        val reflectMaid = aReflectMaid(byteCodeExecutorFactory())
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
             "found: " + parameters[0]
         }
 
@@ -60,15 +61,17 @@ class ByteCodeDynamicProxySpecs {
 
     @Test
     fun dynamicProxyInterfaceCanHaveTypeVariables() {
-        val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
+        val reflectMaid = aReflectMaid(byteCodeExecutorFactory())
 
-        val stringProxy = reflectMaid.createDynamicProxy<MyTypedInterface<String>> { _, parameters ->
+        val stringProxyFactory = reflectMaid.createDynamicProxyFactory<MyTypedInterface<String>>()
+        val stringProxy = stringProxyFactory.createProxy { _, parameters ->
             parameters[0] as String + parameters[1] as String
         }
         val stringResult = stringProxy.call("foo", "bar")
         assertThat(stringResult, `is`("foobar"))
 
-        val intProxy = reflectMaid.createDynamicProxy<MyTypedInterface<Int>> { _, parameters ->
+        val intProxyFactory = reflectMaid.createDynamicProxyFactory<MyTypedInterface<Int>>()
+        val intProxy = intProxyFactory.createProxy { _, parameters ->
             parameters[0] as Int + parameters[1] as Int
         }
         val intResult = intProxy.call(1, 2)
@@ -77,8 +80,9 @@ class ByteCodeDynamicProxySpecs {
 
     @Test
     fun dynamicProxyInterfaceCanHaveMultipleMethods() {
-        val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
-        val proxy = reflectMaid.createDynamicProxy<MyMultiMethodInterface> { method, _ ->
+        val reflectMaid = aReflectMaid(byteCodeExecutorFactory())
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyMultiMethodInterface>()
+        val proxy = proxyFactory.createProxy { method, _ ->
             when (method.name()) {
                 "method0" -> "foo"
                 "method1" -> "bar"
@@ -92,8 +96,9 @@ class ByteCodeDynamicProxySpecs {
 
     @Test
     fun dynamicProxyInterfaceCanHaveVoidMethod() {
-        val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
-        val proxy = reflectMaid.createDynamicProxy<MyVoidInterface> { _, parameters ->
+        val reflectMaid = aReflectMaid(byteCodeExecutorFactory())
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyVoidInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
             @Suppress("UNCHECKED_CAST") val list = parameters[0] as MutableList<String>
             list.add("foo")
         }

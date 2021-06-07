@@ -21,6 +21,7 @@
 package de.quantummaid.reflectmaid
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
+import de.quantummaid.reflectmaid.TypeVariableName.Companion.typeVariableName
 import de.quantummaid.reflectmaid.resolvedtype.ArrayType
 import de.quantummaid.reflectmaid.resolvedtype.ArrayType.Companion.arrayType
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
@@ -29,11 +30,12 @@ import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWith
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.WildcardedType.Companion.wildcardType
 import java.lang.reflect.*
-import java.util.*
 
-internal fun resolveType(reflectMaid: ReflectMaid,
-                         type: Type,
-                         context: ClassType): ResolvedType {
+internal fun resolveType(
+    reflectMaid: ReflectMaid,
+    type: Type,
+    context: ClassType
+): ResolvedType {
     return when (type) {
         is Class<*> -> resolveClass(reflectMaid, type, context)
         is TypeVariable<*> -> resolveTypeVariable(type, context)
@@ -41,30 +43,45 @@ internal fun resolveType(reflectMaid: ReflectMaid,
         is GenericArrayType -> resolveGenericArrayType(reflectMaid, type, context)
         is WildcardType -> resolveWildcard(reflectMaid, type, context)
         else -> throw UnsupportedJvmFeatureInTypeException(
-                "Unknown 'Type' implementation by class '${type.javaClass}' on object '$type'")
+            "Unknown 'Type' implementation by class '${type.javaClass}' on object '$type'"
+        )
     }
 }
 
-private fun resolveClass(reflectMaid: ReflectMaid,
-                         clazz: Class<*>,
-                         fullType: ClassType): ResolvedType {
-    return if (clazz.isArray) {
-        val componentType = resolveType(reflectMaid, clazz.componentType, fullType)
-        arrayType(componentType)
-    } else {
-        fromClassWithoutGenerics(reflectMaid, clazz)
+private fun resolveClass(
+    reflectMaid: ReflectMaid,
+    clazz: Class<*>,
+    fullType: ClassType
+): ResolvedType {
+    return when {
+        clazz.isArray -> {
+            val componentType = resolveType(reflectMaid, clazz.componentType, fullType)
+            arrayType(componentType)
+        }
+        clazz.typeParameters.isNotEmpty() -> {
+            val any = reflectMaid.resolve(Any::class.java)
+            val emptyTypeParameters = clazz.typeParameters.associate { typeVariableName(it) to any }
+            fromClassWithGenerics(reflectMaid, clazz, emptyTypeParameters)
+        }
+        else -> {
+            fromClassWithoutGenerics(reflectMaid, clazz)
+        }
     }
 }
 
-private fun resolveTypeVariable(typeVariable: TypeVariable<*>,
-                                fullType: ClassType): ResolvedType {
-    val typeVariableName = TypeVariableName.typeVariableName(typeVariable)
+private fun resolveTypeVariable(
+    typeVariable: TypeVariable<*>,
+    fullType: ClassType
+): ResolvedType {
+    val typeVariableName = typeVariableName(typeVariable)
     return fullType.resolveTypeVariable(typeVariableName)
 }
 
-private fun resolveParameterizedType(reflectMaid: ReflectMaid,
-                                     parameterizedType: ParameterizedType,
-                                     context: ClassType): ResolvedType {
+private fun resolveParameterizedType(
+    reflectMaid: ReflectMaid,
+    parameterizedType: ParameterizedType,
+    context: ClassType
+): ResolvedType {
     val rawType = parameterizedType.rawType as Class<*>
     val typeVariableNames = TypeVariableName.typeVariableNamesOf(rawType)
     val actualTypeArguments = parameterizedType.actualTypeArguments
@@ -77,17 +94,21 @@ private fun resolveParameterizedType(reflectMaid: ReflectMaid,
     return fromClassWithGenerics(reflectMaid, rawType, typeParameters)
 }
 
-private fun resolveGenericArrayType(reflectMaid: ReflectMaid,
-                                    genericArrayType: GenericArrayType,
-                                    context: ClassType): ArrayType {
+private fun resolveGenericArrayType(
+    reflectMaid: ReflectMaid,
+    genericArrayType: GenericArrayType,
+    context: ClassType
+): ArrayType {
     val componentType = genericArrayType.genericComponentType
     val fullComponentType = resolveType(reflectMaid, componentType, context)
     return arrayType(fullComponentType)
 }
 
-private fun resolveWildcard(reflectMaid: ReflectMaid,
-                            type: WildcardType,
-                            context: ClassType): ResolvedType {
+private fun resolveWildcard(
+    reflectMaid: ReflectMaid,
+    type: WildcardType,
+    context: ClassType
+): ResolvedType {
     return if (type.lowerBounds.isEmpty() && type.upperBounds.size == 1) {
         val upperBound = type.upperBounds[0]
         resolveType(reflectMaid, upperBound, context)

@@ -20,6 +20,7 @@
  */
 package de.quantummaid.reflectmaid
 
+import de.quantummaid.reflectmaid.ReflectMaid.Companion.aReflectMaid
 import de.quantummaid.reflectmaid.util.withException
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert.assertThat
@@ -43,8 +44,9 @@ class DynamicProxySpecs {
 
     @Test
     fun dynamicProxyCanBeCreated() {
-        val reflectMaid = ReflectMaid.aReflectMaid()
-        val proxy = reflectMaid.createDynamicProxy<MyInterface> { _, parameters ->
+        val reflectMaid = aReflectMaid()
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
             "found: " + parameters[0]
         }
 
@@ -54,15 +56,17 @@ class DynamicProxySpecs {
 
     @Test
     fun dynamicProxyInterfaceCanHaveTypeVariables() {
-        val reflectMaid = ReflectMaid.aReflectMaid()
+        val reflectMaid = aReflectMaid()
 
-        val stringProxy = reflectMaid.createDynamicProxy<MyTypedInterface<String>> { _, parameters ->
+        val stringProxyFactory = reflectMaid.createDynamicProxyFactory<MyTypedInterface<String>>()
+        val stringProxy = stringProxyFactory.createProxy { _, parameters ->
             parameters[0] as String + parameters[1] as String
         }
         val stringResult = stringProxy.call("foo", "bar")
         assertThat(stringResult, `is`("foobar"))
 
-        val intProxy = reflectMaid.createDynamicProxy<MyTypedInterface<Int>> { _, parameters ->
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyTypedInterface<Int>>()
+        val intProxy = proxyFactory.createProxy { _, parameters ->
             parameters[0] as Int + parameters[1] as Int
         }
         val intResult = intProxy.call(1, 2)
@@ -71,8 +75,9 @@ class DynamicProxySpecs {
 
     @Test
     fun dynamicProxyInterfaceCanHaveMultipleMethods() {
-        val reflectMaid = ReflectMaid.aReflectMaid()
-        val proxy = reflectMaid.createDynamicProxy<MyMultiMethodInterface> { method, _ ->
+        val reflectMaid = aReflectMaid()
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyMultiMethodInterface>()
+        val proxy = proxyFactory.createProxy { method, _ ->
             when (method.name()) {
                 "method0" -> "foo"
                 "method1" -> "bar"
@@ -86,11 +91,15 @@ class DynamicProxySpecs {
 
     @Test
     fun dynamicProxyCannotBeCreatedOnClass() {
-        val reflectMaid = ReflectMaid.aReflectMaid()
+        val reflectMaid = aReflectMaid()
         val exception = withException<DynamicProxyException> {
-            reflectMaid.createDynamicProxy<String> { _, _ -> }
+            reflectMaid.createDynamicProxyFactory<String>()
         }
-        assertThat(exception.message, `is`("type 'java.lang.String' needs to be an interface" +
-                " to be used as a dynamic proxy facade"))
+        assertThat(
+            exception.message, `is`(
+                "type 'java.lang.String' needs to be an interface" +
+                        " to be used as a dynamic proxy facade"
+            )
+        )
     }
 }

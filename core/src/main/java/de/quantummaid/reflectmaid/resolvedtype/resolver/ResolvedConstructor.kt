@@ -29,10 +29,12 @@ import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter.Compan
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
 
-data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
-                               val declaringType: ResolvedType,
-                               val constructor: Constructor<*>,
-                               val reflectMaid: ReflectMaid) {
+data class ResolvedConstructor(
+    val parameters: List<ResolvedParameter>,
+    val declaringType: ResolvedType,
+    val constructor: Constructor<*>,
+    val reflectMaid: ReflectMaid
+) {
     private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createConstructorExecutor(this) }
 
     val isPublic: Boolean
@@ -48,14 +50,19 @@ data class ResolvedConstructor(val parameters: List<ResolvedParameter>,
     fun createExecutor() = executor.get()
 
     companion object {
-        fun resolveConstructors(reflectMaid: ReflectMaid,
-                                fullType: ClassType): List<ResolvedConstructor> {
-            return fullType.assignableType().declaredConstructors
-                    .filter { !it.isSynthetic }
-                    .map {
-                        val parameters = resolveParameters(reflectMaid, it, fullType)
-                        ResolvedConstructor(parameters, fullType, it, reflectMaid)
-                    }
+        fun resolveConstructors(
+            reflectMaid: ReflectMaid,
+            fullType: ClassType
+        ): List<ResolvedConstructor> {
+
+            val type = fullType.assignableType()
+            val constructorCache = reflectMaid.rawTypeCaches.constructorCache
+            return constructorCache.get(type) { it.declaredConstructors }
+                .filter { !it.isSynthetic }
+                .map {
+                    val parameters = resolveParameters(reflectMaid, it, fullType)
+                    ResolvedConstructor(parameters, fullType, it, reflectMaid)
+                }
         }
     }
 }

@@ -10,16 +10,10 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.2.12</version>
+    <version>0.2.13</version>
     <packaging>pom</packaging>
 
     <name>ReflectMaid</name>
-
-    <modules>
-        <module>bom</module>
-        <module>core</module>
-        <module>integrations</module>
-    </modules>
 
     <properties>
         <dependency-update-file-checksum>8f6ea182969b0fcce9fae1bb13579713</dependency-update-file-checksum>
@@ -141,4 +135,36 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>!deployToMavenCentral</name>
+                </property>
+            </activation>
+            <modules>
+                <module>bom</module>
+                <module>core</module>
+                <module>integrations</module>
+                <module>tests</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>deployToMavenCentral</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>deployToMavenCentral</name>
+                </property>
+            </activation>
+            <modules>
+                <module>bom</module>
+                <module>core</module>
+                <module>integrations</module>
+            </modules>
+        </profile>
+    </profiles>
 </project>

@@ -33,12 +33,14 @@ import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.*
 
-data class ResolvedMethod(val returnType: ResolvedType?,
-                          val parameters: List<ResolvedParameter>,
-                          val declaringType: ResolvedType,
-                          val method: Method,
-                          val language: Language,
-                          val reflectMaid: ReflectMaid) {
+data class ResolvedMethod(
+    val returnType: ResolvedType?,
+    val parameters: List<ResolvedParameter>,
+    val declaringType: ResolvedType,
+    val method: Method,
+    val language: Language,
+    val reflectMaid: ReflectMaid
+) {
     private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createMethodExecutor(this) }
 
     fun returnType(): Optional<ResolvedType> {
@@ -83,25 +85,30 @@ data class ResolvedMethod(val returnType: ResolvedType?,
     fun createExecutor() = executor.get()
 
     companion object {
-        fun resolveMethodsWithResolvableTypeVariables(reflectMaid: ReflectMaid,
-                                                      fullType: ClassType,
-                                                      language: Language): List<ResolvedMethod> {
+        fun resolveMethodsWithResolvableTypeVariables(
+            reflectMaid: ReflectMaid,
+            fullType: ClassType,
+            language: Language
+        ): List<ResolvedMethod> {
             val type = fullType.assignableType()
-            return type.declaredMethods
-                    .filter { !it.isSynthetic }
-                    .mapNotNull {
-                        try {
-                            resolveMethod(reflectMaid, it, fullType, language)
-                        } catch (e: UnresolvableTypeVariableException) {
-                            null
-                        }
+            val methodCache = reflectMaid.rawTypeCaches.methodCache
+            return methodCache.get(type) { it.declaredMethods }
+                .filter { !it.isSynthetic }
+                .mapNotNull {
+                    try {
+                        resolveMethod(reflectMaid, it, fullType, language)
+                    } catch (e: UnresolvableTypeVariableException) {
+                        null
                     }
+                }
         }
 
-        private fun resolveMethod(reflectMaid: ReflectMaid,
-                                  method: Method,
-                                  context: ClassType,
-                                  language: Language): ResolvedMethod {
+        private fun resolveMethod(
+            reflectMaid: ReflectMaid,
+            method: Method,
+            context: ClassType,
+            language: Language
+        ): ResolvedMethod {
             val genericReturnType = method.genericReturnType
             val parameters = ResolvedParameter.resolveParameters(reflectMaid, method, context)
             val returnType: ResolvedType? = if (genericReturnType !== Void.TYPE) {

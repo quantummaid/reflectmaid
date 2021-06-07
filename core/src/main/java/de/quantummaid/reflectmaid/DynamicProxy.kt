@@ -31,50 +31,63 @@ fun interface ProxyHandler {
     fun invoke(method: ResolvedMethod, parameters: List<Any?>): Any?
 }
 
-inline fun <reified T : Any> ReflectMaid.createDynamicProxy(handler: ProxyHandler): T {
+fun interface ProxyFactory<T> {
+    fun createProxy(handler: ProxyHandler): T
+}
+
+inline fun <reified T : Any> ReflectMaid.createDynamicProxyFactory(): ProxyFactory<T> {
     val resolvedType = resolve<T>()
-    return createDynamicProxy(resolvedType, handler)
+    return createDynamicProxyFactory(resolvedType)
 }
 
-fun <T : Any> ReflectMaid.createDynamicProxy(facadeInterface: Class<T>, handler: ProxyHandler): T {
+fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: Class<T>): ProxyFactory<T> {
     val resolvedType = resolve(facadeInterface)
-    return createDynamicProxy(resolvedType, handler)
+    return createDynamicProxyFactory(resolvedType)
 }
 
-fun <T : Any> ReflectMaid.createDynamicProxy(facadeInterface: KClass<T>, handler: ProxyHandler): T {
+fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: KClass<T>): ProxyFactory<T> {
     val resolvedType = resolve(facadeInterface)
-    return createDynamicProxy(resolvedType, handler)
+    return createDynamicProxyFactory(resolvedType)
 }
 
-fun <T> ReflectMaid.createDynamicProxy(facadeInterface: GenericType<T>, handler: ProxyHandler): T {
+fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: GenericType<T>): ProxyFactory<T> {
     val resolvedType = resolve(facadeInterface)
-    return createDynamicProxy(resolvedType, handler)
+    return createDynamicProxyFactory(resolvedType)
 }
 
-fun <T> ReflectMaid.createDynamicProxy(facadeInterface: ResolvedType, handler: ProxyHandler): T {
+fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
     if (!facadeInterface.isInterface) {
         throw DynamicProxyException(
             "type '${facadeInterface.description()}' needs to be an interface to be used " +
                     "as a dynamic proxy facade"
         )
     }
-    return executorFactory.createDynamicProxy(facadeInterface, handler)
+    return executorFactory.createDynamicProxyFactory(facadeInterface)
 }
 
-fun <T> createDynamicProxyUsingInvocationHandler(facadeInterface: ResolvedType, handler: ProxyHandler): T {
-    val methods = facadeInterface.methods()
-        .map { it.method to it }
-        .toMap()
-    val invocationHandler = InternalInvocationHandler(handler, methods)
-    val classLoader = handler::class.java.classLoader
+fun <T> createDynamicProxyFactoryUsingInvocationHandler(facadeInterface: ResolvedType): ProxyFactory<T> {
+    val methods = facadeInterface.methods().associateBy { it.method }
     val assignableType = facadeInterface.assignableType()
-    val proxyInstance = Proxy.newProxyInstance(
-        classLoader,
-        arrayOf(assignableType),
-        invocationHandler
-    )
+    val classLoader = assignableType.classLoader
+    return InvocationHandlerProxyFactory(methods, classLoader, assignableType)
+}
+
+class InvocationHandlerProxyFactory<T>(
+    private val methods: Map<Method, ResolvedMethod>,
+    private val classLoader: ClassLoader,
+    private val assignableType: Class<*>
+) : ProxyFactory<T> {
+
     @Suppress("UNCHECKED_CAST")
-    return proxyInstance as T
+    override fun createProxy(handler: ProxyHandler): T {
+        val invocationHandler = InternalInvocationHandler(handler, methods)
+        val proxyInstance = Proxy.newProxyInstance(
+            classLoader,
+            arrayOf(assignableType),
+            invocationHandler
+        )
+        return proxyInstance as T
+    }
 }
 
 internal class InternalInvocationHandler(

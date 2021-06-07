@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>reflectmaid-parent</artifactId>
-        <version>0.2.12</version>
+        <version>0.2.13</version>
     </parent>
 
     <artifactId>reflectmaid-core</artifactId>
@@ -54,11 +54,6 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-library</artifactId>
             <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
