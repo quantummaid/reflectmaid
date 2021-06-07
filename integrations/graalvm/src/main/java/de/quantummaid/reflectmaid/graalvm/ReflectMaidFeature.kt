@@ -31,16 +31,23 @@ import org.graalvm.nativeimage.impl.RuntimeReflectionSupport
 
 @AutomaticFeature
 class ReflectMaidFeature : Feature {
+    private var registered = false
 
-    override fun beforeAnalysis(access: Feature.BeforeAnalysisAccess?) {
+
+    override fun duringAnalysis(access: Feature.DuringAnalysisAccess) {
+        if (registered) {
+            return
+        }
         REFLECTMAID_REGISTRY.registerReflections { reflections ->
             val runtimeReflectionSupport = ImageSingletons.lookup(RuntimeReflectionSupport::class.java)
             reflections.forEach { registerReflections(it, runtimeReflectionSupport) }
+            access.requireAnalysisIteration()
         }
         REFLECTMAID_REGISTRY.registerDynamicProxies { dynamicProxies ->
             val dynamicProxyRegistry = ImageSingletons.lookup(DynamicProxyRegistry::class.java)
             dynamicProxies.forEach { dynamicProxyRegistry.addProxyClass(it) }
         }
+        registered = true
     }
 
     private fun registerReflections(type: ClassType, runtimeReflectionSupport: RuntimeReflectionSupport) {
