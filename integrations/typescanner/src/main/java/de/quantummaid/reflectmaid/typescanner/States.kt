@@ -109,7 +109,6 @@ class States<T>(
             .filter { it.type() == type }
             .filter { it.scope().contains(scope) }
             .maxByOrNull { it.scope().size() }
-        //return states.any { it.matches(type, scope) }
     }
 
     private fun dumpForLogging(): List<LoggedState> {
