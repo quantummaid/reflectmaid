@@ -59,11 +59,17 @@ class States<T>(
             val newStates: MutableList<StatefulDefinition<T>> = ArrayList(
                 states
             )
-            if (!contains(target.typeIdentifier, target.scope, newStates)) {
-                val detectionRequirements = empty(primaryRequirements, secondaryRequirements)
-                val context = Context<T>(target.typeIdentifier, target.scope, detectionRequirements) { processor.dispatch(it) }
-                val state = stateFactories.createState(target.typeIdentifier, context)
+            val currentState = currentState(target.typeIdentifier, target.scope, newStates)
+            if (currentState == null) {
+                val state = stateFactories.createState(target.typeIdentifier, target.scope) {
+                    createContext(target.typeIdentifier, it, processor)
+                }
                 newStates.add(state)
+            } else {
+                stateFactories.createBetterState(target.typeIdentifier, target.scope, currentState.scope()) {
+                    createContext(target.typeIdentifier, it, processor)
+                }
+                    ?.also { newStates.add(it) }
             }
             newStates.replaceAll {
                 if (it.matches(target.typeIdentifier, target.scope)) {
@@ -74,6 +80,11 @@ class States<T>(
             }
             States(stateFactories, newStates, primaryRequirements, secondaryRequirements)
         }
+    }
+
+    private fun createContext(type: TypeIdentifier, scope: Scope, processor: Processor<T>): Context<T> {
+        val detectionRequirements = empty(primaryRequirements, secondaryRequirements)
+        return Context(type, scope, detectionRequirements) { processor.dispatch(it) }
     }
 
     fun collect(requirementsDescriber: RequirementsDescriber): Map<TypeIdentifier, Map<Scope, Report<T>>> {
@@ -89,12 +100,16 @@ class States<T>(
         return reports
     }
 
-    private fun contains(
+    private fun currentState(
         type: TypeIdentifier,
         scope: Scope,
         states: List<StatefulDefinition<T>>,
-    ): Boolean {
-        return states.any { it.matches(type, scope) }
+    ): StatefulDefinition<T>? {
+        return states
+            .filter { it.type() == type }
+            .filter { it.scope().contains(scope) }
+            .maxByOrNull { it.scope().size() }
+        //return states.any { it.matches(type, scope) }
     }
 
     private fun dumpForLogging(): List<LoggedState> {
