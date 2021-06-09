@@ -20,10 +20,7 @@
  */
 package de.quantummaid.reflectmaid
 
-import java.lang.reflect.GenericDeclaration
 import java.lang.reflect.TypeVariable
-import java.util.*
-import java.util.stream.Collectors
 
 data class TypeVariableName(val name: String) {
 
@@ -36,13 +33,6 @@ data class TypeVariableName(val name: String) {
         @JvmStatic
         fun typeVariableName(typeVariable: TypeVariable<*>): TypeVariableName {
             return typeVariableName(typeVariable.name)
-        }
-
-        @JvmStatic
-        fun typeVariableNamesOf(type: GenericDeclaration): List<TypeVariableName> {
-            return Arrays.stream(type.typeParameters)
-                    .map { typeVariable: TypeVariable<*> -> typeVariableName(typeVariable) }
-                    .collect(Collectors.toList())
         }
     }
 }

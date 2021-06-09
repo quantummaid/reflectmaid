@@ -20,26 +20,44 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype
 
-import de.quantummaid.reflectmaid.languages.Language
+class IndexedCached<I, T>(private val supplier: (I) -> T) {
+    private val map = mutableMapOf<I, T>()
 
-class WildcardedType : ResolvedType {
-    override fun typeParameters(): List<ResolvedType> {
-        return emptyList()
+    fun get(index: I): T {
+        return map.computeIfAbsent(index, supplier)
+    }
+}
+
+private class NullableCacheValue<T>(val value: T?)
+
+class NullableCached<T>(private val supplier: () -> T?) {
+    private val delegate: Cached<NullableCacheValue<T>> = Cached {
+        val value = supplier.invoke()
+        NullableCacheValue(value)
     }
 
-    override fun isAbstract() = false
-    override fun isInterface() = false
-    override fun isWildcard() = true
-    override fun description(language: Language) = language.wildcard()
-    override fun assignableType() = Any::class.java
-    override fun directSuperClass() = null
-    override fun directInterfaces() = emptyList<ResolvedType>()
+    fun get() = delegate.get().value
+}
+
+class Cached<T>(private val supplier: () -> T) {
+    private var cached: T? = null
+
+    fun get(): T {
+        if (cached == null) {
+            cached = supplier.invoke()
+        }
+        return cached!!
+    }
+
+    fun cached(): T? {
+        return cached
+    }
 
     override fun equals(other: Any?): Boolean {
-        return other is WildcardedType
+        return true
     }
 
     override fun hashCode(): Int {
-        return 1
+        return 0
     }
 }

@@ -143,7 +143,7 @@ class CacheSpecs {
     @Test
     fun sameResolvedTypeReferenceGetsReturnedForSameResolvedTypeBasedGenericType() {
         val reflectMaid = ReflectMaid.aReflectMaid()
-        val resolvedType = ClassType.fromClassWithoutGenerics(reflectMaid, String::class.java)
+        val resolvedType = reflectMaid.resolve(String::class.java)
         assertSameReferenceGetsReturned { fromResolvedType<String>(resolvedType) }
     }
 

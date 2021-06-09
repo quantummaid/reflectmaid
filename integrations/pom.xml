@@ -5,11 +5,11 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>reflectmaid-parent</artifactId>
-        <version>0.2.13</version>
+        <version>0.2.14</version>
     </parent>
 
     <artifactId>integrations-parent</artifactId>
-    <version>0.2.13</version>
+    <version>0.2.14</version>
     <packaging>pom</packaging>
 
     <modules>

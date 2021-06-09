@@ -29,6 +29,7 @@ import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException
+import de.quantummaid.reflectmaid.RawClass
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.*
@@ -88,11 +89,10 @@ data class ResolvedMethod(
         fun resolveMethodsWithResolvableTypeVariables(
             reflectMaid: ReflectMaid,
             fullType: ClassType,
+            raw: RawClass,
             language: Language
         ): List<ResolvedMethod> {
-            val type = fullType.assignableType()
-            val methodCache = reflectMaid.rawTypeCaches.methodCache
-            return methodCache.get(type) { it.declaredMethods }
+            return raw.declaredMethods()
                 .filter { !it.isSynthetic }
                 .mapNotNull {
                     try {
