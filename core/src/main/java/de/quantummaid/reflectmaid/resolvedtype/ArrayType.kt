@@ -22,56 +22,38 @@ package de.quantummaid.reflectmaid.resolvedtype
 
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.languages.Language
-import de.quantummaid.reflectmaid.resolvedtype.ClassType.Companion.fromClassWithoutGenerics
+import java.io.Serializable
 import java.lang.reflect.Array
 
-data class ArrayType(private val componentType: ResolvedType) : ResolvedType {
-
-    fun componentType(): ResolvedType {
-        return componentType
+data class ArrayType(
+    private val componentType: ResolvedType,
+    private val reflectMaid: ReflectMaid
+) : ResolvedType {
+    private val assignableType = Cached { Array.newInstance(componentType.assignableType(), 0).javaClass }
+    private val directSuperClass = Cached { reflectMaid.resolve(Any::class.java) }
+    private val directInterfaces = Cached {
+        listOf(Cloneable::class.java, Serializable::class.java)
+            .map { reflectMaid.resolve(it) }
+    }
+    private val simpleDescription = IndexedCached<Language, String> {
+        val componentTypeDescription = componentType.simpleDescription(it)
+        it.array(componentTypeDescription)
     }
 
-    override fun simpleDescription(language: Language): String {
-        val componentTypeDescription = componentType.simpleDescription(language)
-        return language.array(componentTypeDescription)
+    private val description = IndexedCached<Language, String> {
+        val componentTypeDescription = componentType.description(it)
+        it.array(componentTypeDescription)
     }
 
-    override fun description(language: Language): String {
-        val componentTypeDescription = componentType.description(language)
-        return language.array(componentTypeDescription)
-    }
-
-    override val isAbstract: Boolean
-        get() = false
-    override val isInterface: Boolean
-        get() = false
-    override val isWildcard: Boolean
-        get() = false
-    override val isArray: Boolean
-        get() = true
-
-    override fun typeParameters(): List<ResolvedType> {
-        return listOf(componentType)
-    }
-
-    override fun assignableType(): Class<*> {
-        return Array.newInstance(componentType.assignableType(), 0).javaClass
-    }
-
-    companion object {
-        @JvmStatic
-        fun fromArrayClass(reflectMaid: ReflectMaid?,
-                           clazz: Class<*>): ArrayType {
-            if (!clazz.isArray) {
-                throw UnsupportedOperationException()
-            }
-            val componentType: ResolvedType = fromClassWithoutGenerics(reflectMaid!!, clazz.componentType)
-            return arrayType(componentType)
-        }
-
-        @JvmStatic
-        fun arrayType(componentType: ResolvedType): ArrayType {
-            return ArrayType(componentType)
-        }
-    }
+    fun componentType() = componentType
+    override fun simpleDescription(language: Language) = simpleDescription.get(language)
+    override fun description(language: Language) = description.get(language)
+    override fun isAbstract() = false
+    override fun isInterface() = false
+    override fun isWildcard() = false
+    override fun isArray() = true
+    override fun typeParameters() = listOf(componentType)
+    override fun assignableType() = assignableType.get()
+    override fun directSuperClass() = directSuperClass.get()
+    override fun directInterfaces() = directInterfaces.get()
 }

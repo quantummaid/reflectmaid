@@ -66,7 +66,7 @@ class SealedClassesSpecs {
     fun sealedSubclassesForArraysAreEmpty() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<Array<SealedClass>>()
-        assertTrue(resolvedType.isArray)
+        assertTrue(resolvedType.isArray())
         assertThat(resolvedType.sealedSubclasses(), empty())
     }
 

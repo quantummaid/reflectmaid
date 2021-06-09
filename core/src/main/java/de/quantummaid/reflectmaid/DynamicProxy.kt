@@ -56,7 +56,7 @@ fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: GenericType
 }
 
 fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
-    if (!facadeInterface.isInterface) {
+    if (!facadeInterface.isInterface()) {
         throw DynamicProxyException(
             "type '${facadeInterface.description()}' needs to be an interface to be used " +
                     "as a dynamic proxy facade"

@@ -21,12 +21,11 @@
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
-import de.quantummaid.reflectmaid.Getter
 import de.quantummaid.reflectmaid.ReflectMaid
-import de.quantummaid.reflectmaid.Setter
 import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import de.quantummaid.reflectmaid.RawClass
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import java.util.*
@@ -38,31 +37,22 @@ data class ResolvedField(
     val field: Field,
     val reflectMaid: ReflectMaid
 ) {
-    private val getter: Cached<Getter> = Cached { reflectMaid.executorFactory.createFieldGetter(this) }
-    private val setter: Cached<Setter> = Cached { reflectMaid.executorFactory.createFieldSetter(this) }
-
-    val isPublic: Boolean
-        get() {
-            val modifiers = this.field.modifiers
-            return Modifier.isPublic(modifiers)
-        }
-
-    val isStatic: Boolean
-        get() {
-            val modifiers = this.field.modifiers
-            return Modifier.isStatic(modifiers)
-        }
-
-    val isTransient: Boolean
-        get() {
-            val modifiers = this.field.modifiers
-            return Modifier.isTransient(modifiers)
-        }
-
-    fun describe(): String {
+    private val isPublic = Cached {
+        val modifiers = this.field.modifiers
+        Modifier.isPublic(modifiers)
+    }
+    private val isStatic = Cached {
+        val modifiers = this.field.modifiers
+        Modifier.isStatic(modifiers)
+    }
+    private val isTransient = Cached {
+        val modifiers = this.field.modifiers
+        Modifier.isTransient(modifiers)
+    }
+    private val description = Cached {
         val joiner = StringJoiner(" ")
         val modifiers = field.modifiers
-        if (isPublic) {
+        if (isPublic()) {
             joiner.add("public")
         }
         if (Modifier.isProtected(modifiers)) {
@@ -71,10 +61,10 @@ data class ResolvedField(
         if (Modifier.isPrivate(modifiers)) {
             joiner.add("private")
         }
-        if (isStatic) {
+        if (isStatic()) {
             joiner.add("static")
         }
-        if (isTransient) {
+        if (isTransient()) {
             joiner.add("transient")
         }
         if (Modifier.isFinal(modifiers)) {
@@ -83,8 +73,18 @@ data class ResolvedField(
         val typeDescription = type.simpleDescription()
         joiner.add(typeDescription)
         joiner.add(name)
-        return joiner.toString()
+        joiner.toString()
     }
+    private val getter = Cached { reflectMaid.executorFactory.createFieldGetter(this) }
+    private val setter = Cached { reflectMaid.executorFactory.createFieldSetter(this) }
+
+    fun isPublic() = isPublic.get()
+
+    fun isStatic() = isStatic.get()
+
+    fun isTransient() = isTransient.get()
+
+    fun describe() = description.get()
 
     fun createGetter() = getter.get()
 
@@ -93,11 +93,10 @@ data class ResolvedField(
     companion object {
         fun resolvedFields(
             reflectMaid: ReflectMaid,
-            fullType: ClassType
+            fullType: ClassType,
+            raw: RawClass
         ): List<ResolvedField> {
-            val type = fullType.assignableType()
-            val fieldCache = reflectMaid.rawTypeCaches.fieldCache
-            return fieldCache.get(type) { it.declaredFields }
+            return raw.declaredFields()
                 .filter { !it.isSynthetic }
                 .map {
                     val resolved = reflectMaid.resolve(fromReflectionType<Any>(it.genericType, fullType))

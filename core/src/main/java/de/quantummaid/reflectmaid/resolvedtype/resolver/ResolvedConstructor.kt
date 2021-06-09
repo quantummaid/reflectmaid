@@ -20,11 +20,11 @@
  */
 package de.quantummaid.reflectmaid.resolvedtype.resolver
 
-import de.quantummaid.reflectmaid.Executor
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
+import de.quantummaid.reflectmaid.RawClass
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedParameter.Companion.resolveParameters
 import java.lang.reflect.Constructor
 import java.lang.reflect.Modifier
@@ -35,29 +35,26 @@ data class ResolvedConstructor(
     val constructor: Constructor<*>,
     val reflectMaid: ReflectMaid
 ) {
-    private val executor: Cached<Executor> = Cached { reflectMaid.executorFactory.createConstructorExecutor(this) }
-
-    val isPublic: Boolean
-        get() {
-            val modifiers = constructor.modifiers
-            return Modifier.isPublic(modifiers)
-        }
-
-    fun describe(): String {
-        return constructor.toGenericString()
+    private val isPublic = Cached {
+        val modifiers = constructor.modifiers
+        Modifier.isPublic(modifiers)
     }
+    private val description = Cached { constructor.toGenericString() }
+    private val executor = Cached { reflectMaid.executorFactory.createConstructorExecutor(this) }
+
+    fun isPublic() = isPublic.get()
+
+    fun describe() = description.get()
 
     fun createExecutor() = executor.get()
 
     companion object {
         fun resolveConstructors(
             reflectMaid: ReflectMaid,
-            fullType: ClassType
+            fullType: ClassType,
+            raw: RawClass
         ): List<ResolvedConstructor> {
-
-            val type = fullType.assignableType()
-            val constructorCache = reflectMaid.rawTypeCaches.constructorCache
-            return constructorCache.get(type) { it.declaredConstructors }
+            return raw.declaredConstructors()
                 .filter { !it.isSynthetic }
                 .map {
                     val parameters = resolveParameters(reflectMaid, it, fullType)

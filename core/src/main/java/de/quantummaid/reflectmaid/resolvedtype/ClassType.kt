@@ -21,12 +21,15 @@
 package de.quantummaid.reflectmaid.resolvedtype
 
 import de.quantummaid.reflectmaid.GenericType
+import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
+import de.quantummaid.reflectmaid.RawClass
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.ThirdPartyAnnotation.Companion.thirdPartyAnnotation
 import de.quantummaid.reflectmaid.TypeVariableName
 import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.languages.Language.Companion.JAVA
 import de.quantummaid.reflectmaid.languages.Language.Companion.KOTLIN
+import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException.Companion.unresolvableTypeVariableException
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor.Companion.resolveConstructors
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
@@ -38,16 +41,69 @@ import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 
 data class ClassType(
-    private val clazz: Class<*>,
+    private val raw: RawClass,
     private val typeParameters: Map<TypeVariableName, ResolvedType>,
     private val reflectMaid: ReflectMaid
 ) : ResolvedType {
-    private var methods: Cached<List<ResolvedMethod>> =
-        Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this, language()) }
-    private var constructors: Cached<List<ResolvedConstructor>> = Cached { resolveConstructors(reflectMaid, this) }
-    private var fields: Cached<List<ResolvedField>> = Cached { resolvedFields(reflectMaid, this) }
-    private var sealedSubclasses: Cached<List<ResolvedType>> = Cached { resolveSealedSubclasses(this, reflectMaid) }
-    private var language: Cached<Language> = Cached { determineLanguage(this) }
+    private val typeParametersList = Cached {
+        raw
+            .typeParameters()
+            .map { TypeVariableName.typeVariableName(it) }
+            .map { typeParameters[it]!! }
+    }
+    private val methods = Cached { resolveMethodsWithResolvableTypeVariables(reflectMaid, this, raw, language()) }
+    private val constructors = Cached { resolveConstructors(reflectMaid, this, raw) }
+    private val fields = Cached { resolvedFields(reflectMaid, this, raw) }
+    private val sealedSubclasses = Cached { resolveSealedSubclasses(this, reflectMaid) }
+    private val directSuperClass = NullableCached {
+        raw.genericSuperType()
+            ?.let { fromReflectionType<Any>(it, this) }
+            ?.let { reflectMaid.resolve(it) }
+    }
+    private val directInterfaces = Cached {
+        raw.genericInterfaces()
+            .map { fromReflectionType<Any>(it, this) }
+            .map { reflectMaid.resolve(it) }
+    }
+    private val isPublic = Cached {
+        val modifiers = raw.modifiers()
+        Modifier.isPublic(modifiers)
+    }
+    private val isAbstract = Cached {
+        if (raw.isPrimitive()) {
+            false
+        } else {
+            Modifier.isAbstract(raw.modifiers())
+        }
+    }
+    private val isStatic = Cached {
+        val modifiers = raw.modifiers()
+        Modifier.isStatic(modifiers)
+    }
+    private val isInnerClass = Cached {
+        raw.enclosingClass() != null
+    }
+    private val language = Cached { determineLanguage(this) }
+
+    private val description = IndexedCached<Language, String> { language ->
+        if (typeParameters.isEmpty()) {
+            raw.name()
+        } else {
+            val parametersString = typeParameters()
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description(language) }
+            raw.name() + parametersString
+        }
+    }
+
+    private val simpleDescription = IndexedCached<Language, String> { language ->
+        if (typeParameters.isEmpty()) {
+            raw.simpleName()
+        } else {
+            val parametersString = typeParameters()
+                .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription(language) }
+            raw.simpleName() + parametersString
+        }
+    }
 
     fun typeParameter(name: TypeVariableName): ResolvedType {
         require(typeParameters.containsKey(name)) { "No type parameter with the name: ${name.name}" }
@@ -56,146 +112,68 @@ data class ClassType(
 
     fun resolveTypeVariable(name: TypeVariableName): ResolvedType {
         if (!typeParameters.containsKey(name)) {
-            throw UnresolvableTypeVariableException.unresolvableTypeVariableException(name)
+            throw unresolvableTypeVariableException(name)
         }
         return typeParameters[name]!!
-    }
-
-    override fun typeParameters(): List<ResolvedType> {
-        return TypeVariableName.typeVariableNamesOf(clazz)
-            .map { typeParameters[it]!! }
-    }
-
-    override fun methods(): List<ResolvedMethod> {
-        return methods.get()
     }
 
     fun cachedMethods(): List<ResolvedMethod> {
         return methods.cached() ?: emptyList()
     }
 
-    override fun constructors(): List<ResolvedConstructor> {
-        return constructors.get()
-    }
-
     fun cachedConstructors(): List<ResolvedConstructor> {
         return constructors.cached() ?: emptyList()
-    }
-
-    override fun fields(): List<ResolvedField> {
-        return fields.get()
     }
 
     fun cachedFields(): List<ResolvedField> {
         return fields.cached() ?: emptyList()
     }
 
-    override fun sealedSubclasses(): List<ResolvedType> {
-        return sealedSubclasses.get()
-    }
-
-    override fun language(): Language {
-        return language.get()
-    }
-
-    override fun description(language: Language): String {
-        if (typeParameters.isEmpty()) {
-            return clazz.name
-        }
-        val parametersString = typeParameters()
-            .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.description(language) }
-        return clazz.name + parametersString
-    }
-
-    override fun simpleDescription(language: Language): String {
-        if (typeParameters.isEmpty()) {
-            return clazz.simpleName
-        }
-        val parametersString = typeParameters()
-            .joinToString(separator = ", ", prefix = "<", postfix = ">") { it.simpleDescription(language) }
-        return clazz.simpleName + parametersString
-    }
-
-    override val isPublic: Boolean
-        get() {
-            val modifiers = clazz.modifiers
-            return Modifier.isPublic(modifiers)
-        }
-    override val isAbstract: Boolean
-        get() = if (clazz.isPrimitive) {
-            false
-        } else Modifier.isAbstract(clazz.modifiers)
-    override val isInterface: Boolean
-        get() = clazz.isInterface
-    override val isAnonymousClass: Boolean
-        get() = clazz.isAnonymousClass
-    override val isInnerClass: Boolean
-        get() = clazz.enclosingClass != null
-    override val isLocalClass: Boolean
-        get() = clazz.isLocalClass
-    override val isStatic: Boolean
-        get() {
-            val modifiers = clazz.modifiers
-            return Modifier.isStatic(modifiers)
-        }
-    override val isAnnotation: Boolean
-        get() = clazz.isAnnotation
-    override val isWildcard: Boolean
-        get() = false
-
-    override fun assignableType(): Class<*> {
-        return clazz
-    }
+    override fun typeParameters() = typeParametersList.get()
+    override fun methods() = methods.get()
+    override fun constructors() = constructors.get()
+    override fun fields() = fields.get()
+    override fun sealedSubclasses() = sealedSubclasses.get()
+    override fun directSuperClass() = directSuperClass.get()
+    override fun directInterfaces() = directInterfaces.get()
+    override fun language() = language.get()
+    override fun description(language: Language) = description.get(language)
+    override fun simpleDescription(language: Language) = simpleDescription.get(language)
+    override fun isPublic() = isPublic.get()
+    override fun isAbstract() = isAbstract.get()
+    override fun isInterface() = raw.isInterface()
+    override fun isAnonymousClass() = raw.isAnonymousClass()
+    override fun isLocalClass() = raw.isLocalClass()
+    override fun isAnnotation() = raw.isAnnotation()
+    override fun isWildcard() = false
+    override fun assignableType() = raw.wrappedClass()
+    override fun isStatic() = isStatic.get()
+    override fun isInnerClass() = isInnerClass.get()
 
     companion object {
-        @JvmStatic
         fun fromClassWithoutGenerics(
             reflectMaid: ReflectMaid,
-            type: Class<*>
+            raw: RawClass
         ): ClassType {
-            if (type.isArray) {
+            if (raw.isArray()) {
                 throw UnsupportedOperationException()
             }
-            if (type.typeParameters.isNotEmpty()) {
-                throw UnsupportedOperationException("Type variables of '${type.name}' cannot be resolved")
+            if (raw.typeParameters().isNotEmpty()) {
+                throw UnsupportedOperationException("Type variables of '${raw.name()}' cannot be resolved")
             }
-            return fromClassWithGenerics(reflectMaid, type, emptyMap())
+            return fromClassWithGenerics(reflectMaid, raw, emptyMap())
         }
 
-        @JvmStatic
         fun fromClassWithGenerics(
             reflectMaid: ReflectMaid,
-            type: Class<*>,
+            raw: RawClass,
             typeParameters: Map<TypeVariableName, ResolvedType>
         ): ClassType {
-            if (type.isArray) {
+            if (raw.isArray()) {
                 throw UnsupportedOperationException()
             }
-            return ClassType(type, typeParameters, reflectMaid)
+            return ClassType(raw, typeParameters, reflectMaid)
         }
-    }
-}
-
-class Cached<T>(private val supplier: () -> T) {
-    private var cached: T? = null
-
-    fun get(): T {
-        if (cached == null) {
-            cached = supplier.invoke()
-        }
-        return cached!!
-    }
-
-    fun cached(): T? {
-        return cached
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return 0
     }
 }
 
@@ -222,5 +200,14 @@ private fun resolveSealedSubclasses(classType: ClassType, reflectMaid: ReflectMa
             .map { reflectMaid.resolve(it) }
     } else {
         emptyList()
+    }
+}
+
+class UnresolvableTypeVariableException private constructor(message: String) : RuntimeException(message) {
+    companion object {
+        fun unresolvableTypeVariableException(variableName: TypeVariableName): UnresolvableTypeVariableException {
+            val message = "No type variable with name '${variableName.name}'"
+            return UnresolvableTypeVariableException(message)
+        }
     }
 }

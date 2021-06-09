@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021 Richard Hauswald - https://quantummaid.de/.
+/*
+ * Copyright (c) 2020 Richard Hauswald - https://quantummaid.de/.
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -9,7 +9,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -18,24 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package de.quantummaid.reflectmaid.resolvedtype.resolver
 
-import java.lang.reflect.Constructor
-import java.lang.reflect.Field
-import java.lang.reflect.Method
-import java.util.concurrent.ConcurrentHashMap
+package de.quantummaid.reflectmaid.types;
 
-class RawTypeCaches(
-) {
-    val methodCache = RawTypeCache<Method>()
-    val constructorCache = RawTypeCache<Constructor<*>>()
-    val fieldCache = RawTypeCache<Field>()
-}
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-class RawTypeCache<T> {
-    private val map = ConcurrentHashMap<Class<*>, Array<T>>()
-
-    fun get(rawType: Class<*>, extractor: (Class<*>) -> Array<T>): Array<T> {
-        return map.computeIfAbsent(rawType) { extractor.invoke(it) }
-    }
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC)
+public final class TypeWithGenericArray<T> {
+    private final T[] array;
 }
