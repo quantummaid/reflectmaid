@@ -10,7 +10,7 @@
 
     <groupId>de.quantummaid.reflectmaid</groupId>
     <artifactId>reflectmaid-parent</artifactId>
-    <version>0.2.14</version>
+    <version>0.2.15</version>
     <packaging>pom</packaging>
 
     <name>ReflectMaid</name>
@@ -18,7 +18,7 @@
     <properties>
         <dependency-update-file-checksum>8f6ea182969b0fcce9fae1bb13579713</dependency-update-file-checksum>
         <plugin-update-file-checksum>7b8101b685be30c5d1abef25892b7b45</plugin-update-file-checksum>
-        <kotlin.version>1.4.32</kotlin.version>
+        <kotlin.version>1.5.20</kotlin.version>
     </properties>
 
     <dependencyManagement>
@@ -58,6 +58,11 @@
                 <configuration>
                     <javaParameters>true</javaParameters>
                     <jvmTarget>1.8</jvmTarget>
+                    <args>
+                        <arg>-Xopt-in=kotlin.time.ExperimentalTime</arg>
+                        <arg>-Xopt-in=kotlin.io.path.ExperimentalPathApi</arg>
+                        <arg>-Xopt-in=kotlin.io.path.ObsoleteCoroutinesApi</arg>
+                    </args>
                 </configuration>
             </plugin>
             <plugin>
