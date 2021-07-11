@@ -210,8 +210,6 @@ class ActorSpecs {
         assertNotNull(exception)
     }
 
-    @Disabled
-    @Test
     fun oneActorCanWaitForAnotherActorEvenIfTheActorPoolHasOnlyOneThread() {
         val actorPool = ActorPool(fixedThreadPoolDispatcher(1, "foo"))
         assertEquals(0, actorPool.activeActors.size)
