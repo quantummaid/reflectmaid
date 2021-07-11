@@ -210,6 +210,30 @@ class ActorSpecs {
         assertNotNull(exception)
     }
 
+    @Disabled
+    @Test
+    fun oneActorCanWaitForAnotherActorEvenIfTheActorPoolHasOnlyOneThread() {
+        val actorPool = ActorPool(fixedThreadPoolDispatcher(1, "foo"))
+        assertEquals(0, actorPool.activeActors.size)
+
+        val initialState = MyState()
+        val actor = ActorBuilder<MyState, MyMessage>("myactor0")
+            .withPool(actorPool)
+            .withInitialState(initialState)
+            .withMutatingHandler<IncrementMessage> { increment() }
+            .closeOn<CloseMessage>()
+            .launch()
+
+        val delegatingActor = ActorBuilder<MyState, MyMessage>("myactor")
+            .withPool(actorPool)
+            .withInitialState(MyState())
+            .withMutatingHandler<IncrementMessage> { actor.signalAwaitingSuccess(it, 10.seconds) }
+            .closeOn<CloseMessage>()
+            .launch()
+
+        delegatingActor.signalAwaitingSuccess(IncrementMessage, 10.seconds)
+    }
+
     @Test
     fun testActor() {
         val actorPool = ActorPool(fixedThreadPoolDispatcher(1, "foo"))

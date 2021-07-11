@@ -42,21 +42,16 @@ open class ActorPool(executorCoroutineDispatcher: CoroutineDispatcher = Dispatch
             }
             val deferredActorReference = CompletableDeferred<Actor<*, *>>()
             val job: Job = scope.launch {
-                println("gergert")
                 val deferredActor = withTimeout(100) {
                     val await = deferredActorReference.await()
-                    println("timeout done")
                     await
                 }
                 var cancellationException: CancellationException? = null
                 try {
-                    println("pre")
                     actor.handleMessagesOnChannel()
-                    println("post")
                 } catch (e: CancellationException) {
                     cancellationException = e
                 }
-                println("removing")
                 activeActors.remove(deferredActor)
                 if (cancellationException != null) {
                     throw cancellationException
