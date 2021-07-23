@@ -20,7 +20,7 @@
  */
 package de.quantummaid.reflectmaid.typescanner.requirements
 
-class RequirementName(private val name: String) {
+data class RequirementName(private val name: String) {
 
     fun value(): String {
         return name

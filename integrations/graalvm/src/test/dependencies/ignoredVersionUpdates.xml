@@ -7,5 +7,10 @@
         </ignoreVersion>
     </ignoreVersions>
     <rules>
+        <rule groupId="org.graalvm.nativeimage">
+            <ignoreVersions>
+                <ignoreVersion>21.2.0</ignoreVersion>
+            </ignoreVersions>
+        </rule>
     </rules>
 </ruleset>

@@ -25,6 +25,7 @@ import de.quantummaid.reflectmaid.typescanner.requirements.RequirementsReducer
 import de.quantummaid.reflectmaid.typescanner.scopes.Scope
 import de.quantummaid.reflectmaid.typescanner.signals.Signal
 import de.quantummaid.reflectmaid.typescanner.states.DetectionResult
+import de.quantummaid.reflectmaid.typescanner.states.DetectionResult.Companion.success
 import de.quantummaid.reflectmaid.typescanner.states.RequiredAction
 
 fun interface Dispatcher<T> {
@@ -37,7 +38,7 @@ class Context<T>(
     private var detectionRequirements: DetectionRequirements,
     private val dispatcher: Dispatcher<T>
 ) {
-    private var manuallyConfiguredResult: T? = null
+    private var manuallyConfiguredResult: DetectionResult<T>? = null
     private var detectionResult: DetectionResult<T>? = null
 
     fun dispatch(signal: Signal<T>) {
@@ -53,10 +54,14 @@ class Context<T>(
     }
 
     fun setManuallyConfiguredResult(manuallyConfiguredResult: T) {
+        setManuallyConfiguredResult(success(manuallyConfiguredResult))
+    }
+
+    fun setManuallyConfiguredResult(manuallyConfiguredResult: DetectionResult<T>) {
         this.manuallyConfiguredResult = manuallyConfiguredResult
     }
 
-    fun manuallyConfiguredResult(): T? {
+    fun manuallyConfiguredResult(): DetectionResult<T>? {
         return manuallyConfiguredResult
     }
 

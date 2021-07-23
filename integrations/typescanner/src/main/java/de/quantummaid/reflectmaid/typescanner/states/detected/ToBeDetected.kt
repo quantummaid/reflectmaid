@@ -41,7 +41,6 @@ class ToBeDetected<T> constructor(context: Context<T>) : StatefulDefinition<T>(c
         val requirements = context.detectionRequirements()
         val result: DetectionResult<T> = context
             .manuallyConfiguredResult()
-            ?.let { DetectionResult.success(it) }
             ?: detector.detect(type(), scope(), requirements)
         context.setDetectionResult(result)
         return if (result.isFailure()) {
