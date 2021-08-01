@@ -27,17 +27,27 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.lang.Thread.sleep
 import kotlin.time.seconds
 
 sealed class MyMessage
 
-object IncrementMessage : MyMessage()
-object DecrementMessage : MyMessage()
+object IncrementMessage : MyMessage() {
+    override fun toString(): String = IncrementMessage::class.simpleName!!
+}
+
+object DecrementMessage : MyMessage() {
+    override fun toString(): String = DecrementMessage::class.simpleName!!
+}
+
 data class ThrowExceptionMessage(val message: String) : MyMessage()
-object NonRegisteredMessage : MyMessage()
+
+object NonRegisteredMessage : MyMessage() {
+    override fun toString(): String = NonRegisteredMessage::class.simpleName!!
+}
+
 data class SleepMessage(val sleepTimeInMilliseconds: Long) : MyMessage()
 data class CloseMessage(val count: CompletableDeferred<Int> = CompletableDeferred()) : MyMessage()
 
@@ -275,24 +285,28 @@ class ActorSpecs {
     }
 
     private fun assertExceptionsAreRethrown(actor: Actor<MyState, MyMessage>) {
-        var exception: UnsupportedOperationException? = null
-        try {
+        val exception = assertThrows<java.lang.UnsupportedOperationException> {
             actor.signalAwaitingSuccess(ThrowExceptionMessage("my exception"))
-        } catch (e: UnsupportedOperationException) {
-            exception = e
         }
-        assertNotNull(exception)
-        assertEquals("my exception", exception!!.message)
+        assertEquals("my exception", exception.message)
+        val realCause = exception.suppressedExceptions[0] as ActorMessageHandlingException
+        assertEquals(
+            "actorName:myactor actorMessage:ThrowExceptionMessage(message=my exception)",
+            realCause.message
+        )
+        assertEquals("myactor", realCause.actorName)
+        assertEquals(ThrowExceptionMessage("my exception"), realCause.actorMessage)
     }
 
     private fun assertUnkownMessageCausesException(actor: Actor<MyState, MyMessage>) {
-        var exception: UnsupportedMessageException? = null
-        try {
+        val exception = assertThrows<UnsupportedMessageException> {
             actor.signalAwaitingSuccess(NonRegisteredMessage)
-        } catch (e: UnsupportedMessageException) {
-            exception = e
         }
-        assertNotNull(exception)
+        assertEquals("Unsupported message NonRegisteredMessage", exception.message)
+        val realCause = exception.suppressedExceptions[0] as ActorMessageHandlingException
+        assertEquals("actorName:myactor actorMessage:NonRegisteredMessage", realCause.message)
+        assertEquals("myactor", realCause.actorName)
+        assertEquals(NonRegisteredMessage, realCause.actorMessage)
     }
 
     private fun assertDefaultTimeoutWorks(actor: Actor<MyState, MyMessage>) {
