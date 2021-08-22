@@ -37,7 +37,7 @@ class ByteCodeExecutorSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
         val resolvedType = reflectMaid.resolve<String>()
         val method = resolvedType.methods()
-                .filter { it.name() == "strip" }
+                .filter { it.name == "strip" }
                 .first { it.parameters.isEmpty() }
         val executor = method.createExecutor()
         val result = executor.execute("    abc    ", listOf())
@@ -49,7 +49,7 @@ class ByteCodeExecutorSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
         val resolvedType = reflectMaid.resolve<List<String>>()
         val method = resolvedType.methods()
-                .filter { it.name() == "get" }
+                .filter { it.name == "get" }
                 .first { it.parameters.size == 1 }
         val executor = method.createExecutor()
         val list = ArrayList<String>()
@@ -62,7 +62,7 @@ class ByteCodeExecutorSpecs {
     fun staticMethodCanBeExecuted() {
         val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
         val resolvedType = reflectMaid.resolve<TypeWithPublicFields>()
-        val method = resolvedType.methods().first { it.name() == "concat" }
+        val method = resolvedType.methods().first { it.name == "concat" }
         val executor = method.createExecutor()
         val result = executor.execute(null, listOf("a", "b"))
         assertThat(result, `is`("ab"))
@@ -73,7 +73,7 @@ class ByteCodeExecutorSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid(byteCodeExecutorFactory())
         val resolvedType = reflectMaid.resolve<List<String>>()
         val method = resolvedType.methods()
-                .filter { it.name() == "add" }
+                .filter { it.name == "add" }
                 .first { it.parameters.size == 1 }
         val executor = method.createExecutor()
         val list = ArrayList<String>()

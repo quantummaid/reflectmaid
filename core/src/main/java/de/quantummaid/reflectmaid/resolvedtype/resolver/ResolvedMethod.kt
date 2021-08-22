@@ -22,6 +22,7 @@ package de.quantummaid.reflectmaid.resolvedtype.resolver
 
 import de.quantummaid.reflectmaid.Executor
 import de.quantummaid.reflectmaid.GenericType.Companion.fromReflectionType
+import de.quantummaid.reflectmaid.RawClass
 import de.quantummaid.reflectmaid.ReflectMaid
 import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.languages.ParameterData
@@ -29,12 +30,12 @@ import de.quantummaid.reflectmaid.resolvedtype.Cached
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
 import de.quantummaid.reflectmaid.resolvedtype.ResolvedType
 import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException
-import de.quantummaid.reflectmaid.RawClass
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 import java.util.*
 
 data class ResolvedMethod(
+    val name: String,
     val returnType: ResolvedType?,
     val parameters: List<ResolvedParameter>,
     val declaringType: ResolvedType,
@@ -60,19 +61,20 @@ data class ResolvedMethod(
         return true
     }
 
-    fun name(): String = method.name
+    fun isPublic(): Boolean {
+        val modifiers = method.modifiers
+        return Modifier.isPublic(modifiers)
+    }
 
-    val isPublic: Boolean
-        get() {
-            val modifiers = method.modifiers
-            return Modifier.isPublic(modifiers)
-        }
+    fun isStatic(): Boolean {
+        val modifiers = method.modifiers
+        return Modifier.isStatic(modifiers)
+    }
 
-    val isStatic: Boolean
-        get() {
-            val modifiers = method.modifiers
-            return Modifier.isStatic(modifiers)
-        }
+    fun isAbstract(): Boolean {
+        val modifiers = method.modifiers
+        return Modifier.isAbstract(modifiers)
+    }
 
     fun describe() = describe(language)
 
@@ -109,6 +111,7 @@ data class ResolvedMethod(
             context: ClassType,
             language: Language
         ): ResolvedMethod {
+            val name = method.name
             val genericReturnType = method.genericReturnType
             val parameters = ResolvedParameter.resolveParameters(reflectMaid, method, context)
             val returnType: ResolvedType? = if (genericReturnType !== Void.TYPE) {
@@ -116,7 +119,7 @@ data class ResolvedMethod(
             } else {
                 null
             }
-            return ResolvedMethod(returnType, parameters, context, method, language, reflectMaid)
+            return ResolvedMethod(name, returnType, parameters, context, method, language, reflectMaid)
         }
     }
 }

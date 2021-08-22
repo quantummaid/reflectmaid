@@ -78,7 +78,7 @@ class DynamicProxySpecs {
         val reflectMaid = aReflectMaid()
         val proxyFactory = reflectMaid.createDynamicProxyFactory<MyMultiMethodInterface>()
         val proxy = proxyFactory.createProxy { method, _ ->
-            when (method.name()) {
+            when (method.name) {
                 "method0" -> "foo"
                 "method1" -> "bar"
                 else -> throw UnsupportedOperationException()
@@ -101,5 +101,35 @@ class DynamicProxySpecs {
                         " to be used as a dynamic proxy facade"
             )
         )
+    }
+
+    @Test
+    fun dynamicProxyCanHandleToString() {
+        val reflectMaid = aReflectMaid()
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
+            "foo"
+        }
+        assertThat(proxy.toString(), `is`("foo"))
+    }
+
+    @Test
+    fun dynamicProxyCanHandleEquals() {
+        val reflectMaid = aReflectMaid()
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
+            true
+        }
+        assertThat(proxy.equals(null), `is`(true))
+    }
+
+    @Test
+    fun dynamicProxyCanHandleHashCode() {
+        val reflectMaid = aReflectMaid()
+        val proxyFactory = reflectMaid.createDynamicProxyFactory<MyInterface>()
+        val proxy = proxyFactory.createProxy { _, parameters ->
+            1337
+        }
+        assertThat(proxy.hashCode(), `is`(1337))
     }
 }

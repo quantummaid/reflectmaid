@@ -24,8 +24,10 @@ import de.quantummaid.reflectmaid.GenericType.Companion.fromResolvedType
 import de.quantummaid.reflectmaid.GenericType.Companion.genericType
 import de.quantummaid.reflectmaid.GenericType.Companion.wildcard
 import de.quantummaid.reflectmaid.resolvedtype.ClassType
+import de.quantummaid.reflectmaid.resolvedtype.ComparingTypesOfDifferentReflectMaidsException
 import de.quantummaid.reflectmaid.types.TestType
 import de.quantummaid.reflectmaid.types.TypeWithFields
+import de.quantummaid.reflectmaid.util.withException
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -177,6 +179,20 @@ class CacheSpecs {
         assertThat(classType.cachedConstructors().size, `is`(0))
         classType.constructors()
         assertThat(classType.cachedConstructors().size, `is`(1))
+    }
+
+    @Test
+    fun typesOfDifferentReflectMaidsThrowExceptionWhenCompared() {
+        val reflectMaid0 = ReflectMaid.aReflectMaid()
+        val type0 = reflectMaid0.resolve<String>()
+        val reflectMaid1 = ReflectMaid.aReflectMaid()
+        val type1 = reflectMaid1.resolve<String>()
+        val exception = withException<ComparingTypesOfDifferentReflectMaidsException> {
+            @Suppress("UnusedEquals")
+            type0.equals(type1)
+        }
+        assertThat(exception.message, `is`("illegally comparing types of different reflectmaid instances: " +
+                "java.lang.String and java.lang.String"))
     }
 
     private fun assertSameReferenceGetsReturned(genericTypeFactory: () -> GenericType<*>) {

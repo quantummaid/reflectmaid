@@ -83,7 +83,7 @@ class ByteCodeDynamicProxySpecs {
         val reflectMaid = aReflectMaid(byteCodeExecutorFactory())
         val proxyFactory = reflectMaid.createDynamicProxyFactory<MyMultiMethodInterface>()
         val proxy = proxyFactory.createProxy { method, _ ->
-            when (method.name()) {
+            when (method.name) {
                 "method0" -> "foo"
                 "method1" -> "bar"
                 else -> throw UnsupportedOperationException()

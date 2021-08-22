@@ -75,7 +75,11 @@ class GraalVmExtensionSpecs {
         var reflections: List<ClassType>? = null
         reflectMaidRegistry.registerReflections { reflections = it }
         assertThat(reflections, `is`(notNullValue()))
-        assertThat(reflections!!.map { it.simpleDescription() }, contains("MyInterface"))
+        assertThat(
+            reflections!!.map { it.simpleDescription() }, containsInAnyOrder(
+                "MyInterface", "Object", "long", "int", "boolean", "String", "Class<Object>"
+            )
+        )
         assertThat(reflections!![0].cachedMethods().size, `is`(1))
         assertThat(reflections!![0].cachedConstructors().size, `is`(0))
         assertThat(reflections!![0].cachedFields().size, `is`(0))
@@ -148,7 +152,11 @@ class GraalVmExtensionSpecs {
         var reflections: List<ClassType>? = null
         reflectMaidRegistry.registerReflections { reflections = it }
         assertThat(reflections, `is`(notNullValue()))
-        assertThat(reflections!!.map { it.simpleDescription() }, contains("MyInterface"))
+        assertThat(
+            reflections!!.map { it.simpleDescription() }, containsInAnyOrder(
+                "MyInterface", "Object", "long", "int", "boolean", "String", "Class<Object>"
+            )
+        )
         assertThat(reflections!![0].cachedMethods().size, `is`(1))
         assertThat(reflections!![0].cachedConstructors().size, `is`(0))
         assertThat(reflections!![0].cachedFields().size, `is`(0))

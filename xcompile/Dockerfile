@@ -1,13 +1,29 @@
+#
+# Use this dockerfile to run continuous integration maven goals that require graalvm on your local development machine:
+#
+# 	$ snap install docker
+# 	# in reflectmaid top-level directory
+# 	$ docker build -f xcompile/Dockerfile -t reflectmaid-ci .
+# 	$ docker run -it --rm --volume=$HOME/.m2:/root/.m2 reflectmaid-ci bash
+# 	$ mvn verify -DprepareForMavenCentral (-Ddependency-check.skip)
+#
+# if you get the following warning, update GRAALVM_VERSION:
+# 	...
+# 	[WARNING] Major.Minor version mismatch between native-image-maven-plugin (21.1.0) and native-image executable (21.0.0.2)
+#
+#
 FROM openjdk:11-jdk-slim
+
+ARG GRAALVM_VERSION=21.1.0
 
 RUN apt-get update --yes
 RUN apt-get upgrade --yes
 RUN apt-get autoremove --yes
 RUN apt-get install --yes --no-install-recommends unzip curl gnupg python3-pip jq bc git build-essential libz-dev zlib1g-dev
-RUN curl -L "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-linux-amd64-21.0.0.2.tar.gz" -o "graalvm.tar.gz" && \
+RUN curl -L "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-java11-linux-amd64-${GRAALVM_VERSION}.tar.gz" -o "graalvm.tar.gz" && \
     tar -xzf graalvm.tar.gz
-ENV PATH="/graalvm-ce-java11-21.0.0.2/bin:${PATH}"
-ENV JAVA_HOME="/graalvm-ce-java11-21.0.0.2/"
+ENV PATH="/graalvm-ce-java11-${GRAALVM_VERSION}/bin:${PATH}"
+ENV JAVA_HOME="/graalvm-ce-java11-${GRAALVM_VERSION}/"
 RUN gu install native-image
 RUN echo "alias python='python3'" >> ~/.bashrc
 RUN . ~/.bashrc

@@ -56,7 +56,7 @@ class ByteCodeExecutorFactory(private val generator: Generator) : ExecutorFactor
         val declaringClass = method.declaringType.toTypeName()
         builder.addStatement("final \$T typedInstance = (\$T) instance", declaringClass, declaringClass)
         val parametersString = buildParameters(method.parameters, builder)
-        val methodCall = "typedInstance.${method.name()}($parametersString)"
+        val methodCall = "typedInstance.${method.name}($parametersString)"
         if (method.returnType != null) {
             builder.addStatement("return $methodCall")
         } else {
@@ -101,12 +101,12 @@ class ByteCodeExecutorFactory(private val generator: Generator) : ExecutorFactor
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
+    override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType, reflectMaid: ReflectMaid): ProxyFactory<T> {
         return ProxyFactory { handler ->
             val proxyHandlerName = "proxyHandler"
 
             val methods = facadeInterface.methods()
-            val methodFields = methods.map { Field(it.name() + "Method", TypeName.get(ResolvedMethod::class.java)) }
+            val methodFields = methods.map { Field(it.name + "Method", TypeName.get(ResolvedMethod::class.java)) }
             val fieldsAndConstructor = FieldsAndConstructor.createFieldsAndConstructor(
                 listOf(
                     Field(proxyHandlerName, TypeName.get(ProxyHandler::class.java))
@@ -114,7 +114,7 @@ class ByteCodeExecutorFactory(private val generator: Generator) : ExecutorFactor
             )
 
             val methodSpecs = methods.map { method ->
-                val methodSpec = overrideMethod(method.name())
+                val methodSpec = overrideMethod(method.name)
                 val returnType = method.returnType
                 val returnTypeName = returnType?.toTypeName() ?: TypeName.VOID
                 methodSpec.returns(returnTypeName)
@@ -127,7 +127,7 @@ class ByteCodeExecutorFactory(private val generator: Generator) : ExecutorFactor
                 val parametersForList = method.parameters.joinToString { it.name() }
                 methodSpec.addStatement("final \$T list = \$T.of($parametersForList)", listType, List::class.java)
                 methodSpec.addStatement(
-                    "final \$T returnValue = $proxyHandlerName.invoke(${method.name() + "Method"}, list)",
+                    "final \$T returnValue = $proxyHandlerName.invoke(${method.name + "Method"}, list)",
                     Any::class.java
                 )
                 if (returnType != null) {
@@ -229,4 +229,3 @@ data class FieldsAndConstructor(val fieldSpecs: List<FieldSpec>, val constructor
 }
 
 data class Field(val name: String, val type: TypeName)
-

@@ -22,6 +22,7 @@ package de.quantummaid.reflectmaid.resolvedtype
 
 import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.languages.Language.Companion.JAVA
+import de.quantummaid.reflectmaid.queries.QueryPath
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedField
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedMethod
@@ -76,5 +77,10 @@ interface ResolvedType {
             false
         } else typeParameters()
             .all { it.isInstantiatable() }
+    }
+
+    fun <T> query(path: QueryPath<T>, reason: String? = null): T {
+        val message = "can only run queries on classes but tried to run query on ${description()}"
+        throw UnsupportedOperationException(message)
     }
 }

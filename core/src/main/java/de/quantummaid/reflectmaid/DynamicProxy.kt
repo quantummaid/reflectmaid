@@ -62,11 +62,14 @@ fun <T : Any> ReflectMaid.createDynamicProxyFactory(facadeInterface: ResolvedTyp
                     "as a dynamic proxy facade"
         )
     }
-    return executorFactory.createDynamicProxyFactory(facadeInterface)
+    return executorFactory.createDynamicProxyFactory(facadeInterface, this)
 }
 
-fun <T> createDynamicProxyFactoryUsingInvocationHandler(facadeInterface: ResolvedType): ProxyFactory<T> {
-    val methods = facadeInterface.methods().associateBy { it.method }
+fun <T> createDynamicProxyFactoryUsingInvocationHandler(facadeInterface: ResolvedType, reflectMaid: ReflectMaid): ProxyFactory<T> {
+    val objectType = reflectMaid.resolve(Any::class.java)
+    val methods = listOf(facadeInterface, objectType)
+        .flatMap { it.methods() }
+        .associateBy { it.method }
     val assignableType = facadeInterface.assignableType()
     val classLoader = assignableType.classLoader
     return InvocationHandlerProxyFactory(methods, classLoader, assignableType)
