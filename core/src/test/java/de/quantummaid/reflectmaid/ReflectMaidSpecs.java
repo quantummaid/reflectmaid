@@ -80,7 +80,7 @@ public final class ReflectMaidSpecs {
         assertThat(method.isPublic(), is(true));
         assertThat(method.describe(), is("'String method()' [public java.lang.String de.quantummaid.reflectmaid.types.TestType.method()]"));
         assertThat(method.getParameters(), hasSize(0));
-        assertThat(method.name(), is("method"));
+        assertThat(method.getName(), is("method"));
         assertThat(method.returnType().isPresent(), is(true));
         assertThat(method.getMethod().getName(), is("method"));
 
@@ -129,7 +129,7 @@ public final class ReflectMaidSpecs {
 
         assertThat(classType.methods(), hasSize(3));
         final ResolvedMethod parameterizedMethod = classType.methods().stream()
-                .filter(resolvedMethod -> resolvedMethod.name().equals("foo"))
+                .filter(resolvedMethod -> resolvedMethod.getName().equals("foo"))
                 .findFirst()
                 .orElseThrow();
         assertThat(parameterizedMethod.describe(), is("'void foo(TestTypeWithTypeVariables<String> other)' " +

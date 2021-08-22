@@ -26,7 +26,7 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid.tests</groupId>
         <artifactId>tests-parent</artifactId>
-        <version>0.2.16</version>
+        <version>0.2.19</version>
     </parent>
 
     <artifactId>graalvmtestimage</artifactId>

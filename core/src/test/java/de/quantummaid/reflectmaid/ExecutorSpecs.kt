@@ -37,7 +37,7 @@ class ExecutorSpecs {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<String>()
         val method = resolvedType.methods()
-                .filter { it.name() == "strip" }
+                .filter { it.name == "strip" }
                 .first { it.parameters.isEmpty() }
         val executor = method.createExecutor()
         val result = executor.execute("    abc    ", listOf())
@@ -48,7 +48,7 @@ class ExecutorSpecs {
     fun staticMethodCanBeExecutedByReflection() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<TypeWithPublicFields>()
-        val method = resolvedType.methods().first { it.name() == "concat" }
+        val method = resolvedType.methods().first { it.name == "concat" }
         val executor = method.createExecutor()
         val result = executor.execute(null, listOf("a", "b"))
         assertThat(result, `is`("ab"))

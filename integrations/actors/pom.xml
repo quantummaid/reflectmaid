@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>0.2.16</version>
+        <version>0.2.19</version>
     </parent>
 
     <artifactId>reflectmaid-actors</artifactId>
@@ -17,7 +17,7 @@
         <spotbugs.excludeFilterFile>
             ${project.basedir}/src/test/spotbugs/spotbugs-exclude.xml
         </spotbugs.excludeFilterFile>
-        <kotlin.version>1.5.20</kotlin.version>
+        <kotlin.version>1.5.21</kotlin.version>
     </properties>
 
     <dependencyManagement>

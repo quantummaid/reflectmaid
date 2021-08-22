@@ -18,11 +18,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package de.quantummaid.reflectmaid.typescanner.requirements
+package de.quantummaid.reflectmaid
 
-data class RequirementName(private val name: String) {
+import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.MatcherAssert.assertThat
+import org.junit.jupiter.api.Test
 
-    fun value(): String {
-        return name
+class TypeTokenSpecs {
+
+    @Test
+    fun multipleTypeTokensCanBeSpecifiedInSameFile() {
+        val reflectMaid = ReflectMaid.aReflectMaid()
+        val resolved0 = reflectMaid.resolve<Int>()
+        assertThat(resolved0.simpleDescription(), `is`("Integer"))
+        val resolved1 = reflectMaid.resolve<String>()
+        assertThat(resolved1.simpleDescription(), `is`("String"))
     }
 }

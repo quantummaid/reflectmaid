@@ -29,6 +29,7 @@ import de.quantummaid.reflectmaid.TypeVariableName
 import de.quantummaid.reflectmaid.languages.Language
 import de.quantummaid.reflectmaid.languages.Language.Companion.JAVA
 import de.quantummaid.reflectmaid.languages.Language.Companion.KOTLIN
+import de.quantummaid.reflectmaid.queries.QueryPath
 import de.quantummaid.reflectmaid.resolvedtype.UnresolvableTypeVariableException.Companion.unresolvableTypeVariableException
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor
 import de.quantummaid.reflectmaid.resolvedtype.resolver.ResolvedConstructor.Companion.resolveConstructors
@@ -40,7 +41,7 @@ import java.lang.reflect.Modifier
 import kotlin.jvm.internal.Reflection
 import kotlin.reflect.KClass
 
-data class ClassType(
+class ClassType(
     private val raw: RawClass,
     private val typeParameters: Map<TypeVariableName, ResolvedType>,
     private val reflectMaid: ReflectMaid
@@ -174,6 +175,30 @@ data class ClassType(
             }
             return ClassType(raw, typeParameters, reflectMaid)
         }
+    }
+
+    override fun <T> query(path: QueryPath<T>, reason: String?): T {
+        return path.extract(this, reason, reflectMaid)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other == null) {
+            return false
+        }
+        if (other !is ClassType) {
+            return false
+        }
+        if (other.reflectMaid != reflectMaid) {
+            throw ComparingTypesOfDifferentReflectMaidsException(this, other)
+        }
+        if (other.raw != raw) {
+            return false
+        }
+        return other.typeParameters == typeParameters
+    }
+
+    override fun hashCode(): Int {
+        return raw.hashCode()
     }
 }
 

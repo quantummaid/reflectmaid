@@ -1,3 +1,4 @@
+
 /**
  * Copyright (c) 2021 Richard Hauswald - https://quantummaid.de/.
  *
@@ -18,11 +19,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package de.quantummaid.reflectmaid.typescanner.requirements
+package de.quantummaid.reflectmaid.actors
 
-data class RequirementName(private val name: String) {
+import java.lang.RuntimeException
 
-    fun value(): String {
-        return name
-    }
-}
+open class ActorMessageHandlingException(
+    val actorName: String,
+    val actorMessage: Any,
+) : RuntimeException(
+    "actorName:$actorName actorMessage:$actorMessage",
+    null,
+    false,
+    true // prevent fillInStackTrace()
+)

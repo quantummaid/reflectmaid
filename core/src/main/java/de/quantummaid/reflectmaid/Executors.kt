@@ -43,7 +43,7 @@ interface ExecutorFactory {
     fun createConstructorExecutor(constructor: ResolvedConstructor): Executor
     fun createFieldGetter(field: ResolvedField): Getter
     fun createFieldSetter(field: ResolvedField): Setter
-    fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T>
+    fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType, reflectMaid: ReflectMaid): ProxyFactory<T>
 }
 
 class ReflectionExecutorFactory : ExecutorFactory {
@@ -55,9 +55,12 @@ class ReflectionExecutorFactory : ExecutorFactory {
 
     override fun createFieldGetter(field: ResolvedField) = ReflectionFieldGetter(field)
     override fun createFieldSetter(field: ResolvedField) = ReflectionFieldSetter(field)
-    override fun <T> createDynamicProxyFactory(facadeInterface: ResolvedType): ProxyFactory<T> {
+    override fun <T> createDynamicProxyFactory(
+        facadeInterface: ResolvedType,
+        reflectMaid: ReflectMaid
+    ): ProxyFactory<T> {
         registeredDynamicProxies.add(facadeInterface)
-        return createDynamicProxyFactoryUsingInvocationHandler(facadeInterface)
+        return createDynamicProxyFactoryUsingInvocationHandler(facadeInterface, reflectMaid)
     }
 
     fun registeredDynamicProxies(): List<ResolvedType> {

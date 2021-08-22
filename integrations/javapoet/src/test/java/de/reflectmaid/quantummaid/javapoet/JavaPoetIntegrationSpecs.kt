@@ -47,7 +47,7 @@ class JavaPoetIntegrationSpecs {
     fun classNameOfPrimitiveCanBeMapped() {
         val reflectMaid = ReflectMaid.aReflectMaid()
         val resolvedType = reflectMaid.resolve<List<Any>>()
-        val sizeMethod = resolvedType.methods().first { it.name() == "size" }
+        val sizeMethod = resolvedType.methods().first { it.name == "size" }
         val intType = sizeMethod.returnType!!
         val typeName = intType.toTypeName()
         assertThat(typeName.toString(), `is`("int"))

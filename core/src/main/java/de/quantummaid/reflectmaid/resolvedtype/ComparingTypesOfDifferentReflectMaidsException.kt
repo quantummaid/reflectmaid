@@ -18,11 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package de.quantummaid.reflectmaid.typescanner.requirements
+package de.quantummaid.reflectmaid.resolvedtype
 
-data class RequirementName(private val name: String) {
+class ComparingTypesOfDifferentReflectMaidsException(a: ResolvedType, b: ResolvedType) : RuntimeException(
+    "illegally comparing types of different reflectmaid instances:" +
+            " ${a.description()} and ${b.description()}"
+)
 
-    fun value(): String {
-        return name
-    }
-}

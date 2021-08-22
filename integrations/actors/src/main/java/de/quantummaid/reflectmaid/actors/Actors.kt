@@ -68,12 +68,14 @@ class Actor<State : Any, Message : Any> private constructor(
             if (closing) {
                 channel.close()
             }
+            val currentMessage = actorMessage.delegate
             try {
-                val wrappedMessage = actorMessage.delegate
-                currentState = messageHandlers.handle(currentState, wrappedMessage)
+                currentState = messageHandlers.handle(currentState, currentMessage)
                 actorMessage.exception.complete(null)
-            } catch (e: Throwable) {
-                actorMessage.exception.complete(e)
+            } catch (t: Throwable) {
+                val exceptionWithInfo = ActorMessageHandlingException(name, currentMessage)
+                t.addSuppressed(exceptionWithInfo)
+                actorMessage.exception.complete(t)
             }
             if (closing) {
                 return
