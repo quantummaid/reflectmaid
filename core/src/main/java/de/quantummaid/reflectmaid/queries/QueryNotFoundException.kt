@@ -49,23 +49,23 @@ class QueryNotFoundException private constructor(override val message: String) :
             reason: String?
         ): QueryNotFoundException {
             val renderedCurrent = currentElement.render(reflectMaid)
-            val renderedType = renderClassHierarchical(currentType, reflectMaid)
+            val renderedType = renderClassHierarchical(currentType)
             val message = "unable to find query [${renderedCurrent}] in type ${currentType.description()}\n" +
                     renderedType
             return queryNotFoundException(message, queryPath, currentMatch, reflectMaid, reason)
         }
 
-        private fun renderClassHierarchical(resolvedType: ResolvedType, reflectMaid: ReflectMaid): String {
-            val base = renderClass(resolvedType, reflectMaid)
+        private fun renderClassHierarchical(resolvedType: ResolvedType): String {
+            val base = renderClass(resolvedType)
             val inherited = resolvedType.allSupertypes().joinToString(separator = "\n") {
-                val rendered = renderClass(it, reflectMaid)
+                val rendered = renderClass(it)
                 "inherited from ${it.description()}:\n" +
                         rendered
             }
             return "$base\n$inherited"
         }
 
-        private fun renderClass(resolvedType: ResolvedType, reflectMaid: ReflectMaid): String {
+        private fun renderClass(resolvedType: ResolvedType): String {
             val fields = resolvedType.fields()
             val fieldDescriptions = if (fields.isEmpty()) {
                 ""
