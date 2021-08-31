@@ -40,26 +40,24 @@ open class ActorPool(executorCoroutineDispatcher: CoroutineDispatcher = Dispatch
             if (!scope.isActive) {
                 throw ActorPoolAlreadyClosedException()
             }
-            val deferredActorReference = CompletableDeferred<Actor<*, *>>()
-            val job: Job = scope.launch {
-                val deferredActor = withTimeout(100) {
-                    val await = deferredActorReference.await()
-                    await
-                }
+            val actorLaunchLatch = CompletableDeferred<Boolean>()
+            val job: Job = scope.launch(CoroutineName(actor.name)) {
+                activeActors.add(actor)
+                actorLaunchLatch.complete(true)
                 var cancellationException: CancellationException? = null
                 try {
                     actor.handleMessagesOnChannel()
                 } catch (e: CancellationException) {
                     cancellationException = e
+                } finally {
+                    activeActors.remove(actor)
                 }
-                activeActors.remove(deferredActor)
                 if (cancellationException != null) {
-                    throw cancellationException
+                    throw cancellationException // seems to get swallowed.
                 }
             }
 
-            activeActors.add(actor)
-            deferredActorReference.complete(actor)
+            runBlocking { actorLaunchLatch.await() }
             return job
         }
     }

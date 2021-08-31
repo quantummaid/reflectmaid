@@ -27,10 +27,10 @@ import kotlinx.coroutines.channels.ClosedSendChannelException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.lang.Thread.sleep
+import java.util.concurrent.CompletableFuture
 import kotlin.time.seconds
 
 sealed class MyMessage
@@ -133,9 +133,9 @@ class ActorSpecs {
     @Test
     fun actorsCanOverwriteOnCancelBehaviour() {
         val actorPool = ActorPool()
-
         assertEquals(0, actorPool.activeActors.size)
 
+        val onCancelMethodWasInvoked = CompletableFuture<Boolean>()
         val state = MyState()
         ActorBuilder<MyState, MyMessage>("myactor")
             .withPool(actorPool)
@@ -146,18 +146,14 @@ class ActorSpecs {
                 it.count.complete(count)
             }
             .onCancel {
+                onCancelMethodWasInvoked.complete(true)
             }
             .launch()
         assertEquals(1, actorPool.activeActors.size)
 
-        var exception: TimeoutDuringCloseOfActorPoolException? = null
-        try {
-            actorPool.close()
-        } catch (e: TimeoutDuringCloseOfActorPoolException) {
-            exception = e
-        }
-        assertNotNull(exception)
-        assertEquals("active actors: myactor; ", exception!!.message)
+        actorPool.close()
+
+        assertTrue(onCancelMethodWasInvoked.get())
     }
 
     @Test
@@ -182,7 +178,6 @@ class ActorSpecs {
         actor.signalAwaitingSuccess(CloseMessage())
 
         actorPool.close()
-        println("done closing pool")
         var exception: ClosedSendChannelException? = null
         try {
             actor.signalAwaitingSuccess(SleepMessage(10_000), 20.seconds)
