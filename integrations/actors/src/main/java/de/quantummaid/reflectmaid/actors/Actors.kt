@@ -107,4 +107,16 @@ class Actor<State : Any, Message : Any> private constructor(
     override fun close() {
         channel.close()
     }
+
+    override fun toString(): String {
+        return "Actor(name='$name', " +
+                "job=$job, " +
+                "job.isActive=${job.isActive}, " +
+                "job.isCompleted=${job.isCompleted}, " +
+                "job.isCancelled=${job.isCancelled}, " +
+                "channel=${channel}, " +
+                "channel.isClosedForReceive=${channel.isClosedForReceive}, " +
+                "channel.isClosedForSend=${channel.isClosedForSend}, " +
+                "currentState=$currentState)"
+    }
 }

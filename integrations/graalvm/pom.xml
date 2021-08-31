@@ -5,7 +5,7 @@
     <parent>
         <groupId>de.quantummaid.reflectmaid</groupId>
         <artifactId>integrations-parent</artifactId>
-        <version>0.2.19</version>
+        <version>0.2.20</version>
     </parent>
 
     <artifactId>reflectmaid-graalvm</artifactId>
