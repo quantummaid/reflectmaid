@@ -21,13 +21,15 @@
 package de.quantummaid.reflectmaid.actors
 
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import kotlin.reflect.KClass
 import kotlin.time.Duration
-import kotlin.time.milliseconds
+import kotlin.time.Duration.Companion.milliseconds
 
 data class ActorMessage<Message : Any>(
     val delegate: Message,
@@ -83,12 +85,17 @@ class Actor<State : Any, Message : Any> private constructor(
         }
     }
 
-    fun signalAwaitingSuccess(msg: Message, timeout: Duration = 100.milliseconds) {
-        val exception = runBlocking {
-            withTimeout(timeout) {
-                val actorMessage = ActorMessage(msg)
-                channel.send(actorMessage)
-                actorMessage.exception.await()
+    fun signalAwaitingSuccess(msg: Message, timeout: Duration = milliseconds(100)) {
+        val coroutineName = CoroutineName("$name!$timeout($msg}")
+        val exception = runBlocking(coroutineName) {
+            try {
+                withTimeout(timeout) {
+                    val actorMessage = ActorMessage(msg)
+                    channel.send(actorMessage)
+                    actorMessage.exception.await()
+                }
+            } catch (e: TimeoutCancellationException) {
+                throw UnsupportedOperationException("signalAwaitingSuccess timeout after $timeout (msg:$msg)", e)
             }
         }
         if (exception != null) {
